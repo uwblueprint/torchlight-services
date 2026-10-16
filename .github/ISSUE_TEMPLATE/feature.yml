@@ -1,0 +1,50 @@
+name: Feature proposal
+description: Propose a user-facing feature or workflow improvement.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include participant names, receipts, financial records, or other personal information."
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who is affected, and what are they trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should the user be able to do?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable conditions for considering this done.
+      placeholder: |
+        - Given ...
+        - When ...
+        - Then ...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Decisions or dependencies
+      description: Does this depend on a Torchlight, Ministry, security, or design decision?
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Worker portal
+        - Admin portal
+        - API or database
+        - Reporting and audits
+        - Developer experience
+        - Other
+    validations:
+      required: true

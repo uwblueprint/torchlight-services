@@ -1,0 +1,38 @@
+name: Engineering task
+description: Propose a discrete implementation or maintenance task.
+title: "[Task]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include participant data, receipts, credentials, or secrets."
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this task needed? Link a decision or parent issue when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables and acceptance criteria
+      description: State the expected, verifiable result.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and open decisions
+      description: Call out data, API, security, policy, or design dependencies.
+  - type: textarea
+    id: tests
+    attributes:
+      label: Verification
+      description: What tests or manual checks should demonstrate completion?
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: This task does not require real participant data or production credentials.
+          required: true
