@@ -1,17 +1,23 @@
-const steps = ["Upload receipt", "Check details", "Admin review"];
+import { PageStub } from "@/components/page-stub";
 
 export default function SubmitExpensePage() {
-  return (
-    <>
-      <div className="page-heading"><div><p className="eyebrow">Worker workspace</p><h1>Submit an expense</h1><p>A preview of the proposed receipt workflow. Nothing is uploaded or saved.</p></div></div>
-      <ol className="stepper">{steps.map((step, index) => <li className={index === 0 ? "active" : ""} key={step}><span>{String(index + 1).padStart(2, "0")}</span>{step}</li>)}</ol>
-      <div className="content-grid upload-layout">
-        <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Step one</p><h2>Add a receipt</h2></div><span className="period-chip">PDF · JPEG · Word*</span></div>
-          <div className="upload-zone"><span className="upload-symbol">↑</span><strong>Choose a receipt file</strong><p>Drag a file here or browse your device.</p><button className="button button-secondary" type="button">Choose file</button><small>File limits and accepted formats need Torchlight confirmation.</small></div>
-          <p className="prototype-warning"><strong>Prototype only.</strong> Upload, OCR, and storage are not connected yet. Do not use real participant data.</p>
-        </section>
-        <aside className="panel"><p className="eyebrow">What happens next</p><h2>People stay in control.</h2><ol className="review-steps"><li><span>1</span><div><strong>Receipt saved privately</strong><p>Original receipt linked to a participant and uploader.</p></div></li><li><span>2</span><div><strong>Details extracted</strong><p>OCR suggests values; it does not approve an expense.</p></div></li><li><span>3</span><div><strong>Reviewed before posting</strong><p>Confirmed expenses follow a defined approval and balance workflow.</p></div></li></ol><p className="muted-copy">Pending expenses should not silently change approved balances; final ledger rules remain to be decided.</p></aside>
-      </div>
-    </>
-  );
+  return <PageStub
+    audience="Passport Worker"
+    title="Add an expense"
+    description="The research flow starts with a participant, then receipt upload, expense details, category selection, and a coverage check. PassportONE instructions show an Expense Log with an Add Expense action and a separate Log Expense form."
+    developerTasks={[
+      "Connect assigned-participant selection and receipt upload (PDF, JPEG, Word; size limit still needs implementing from an approved value).",
+      "Support multiple expenses/receipts and show the current submission batch before saving.",
+      "Add expense date, amount, vendor/description, category, and category subcategory fields based on PassportONE categories.",
+      "Add non-AI receipt parsing only if included by scope; keep extracted values editable and flagged for review.",
+      "Call the coverage calculator, show covered versus out-of-pocket, and save the expense against its participant and fiscal year.",
+      "Record notes about the family/participant conversation where required; do not assume an acknowledgment rule in this UI stub.",
+    ]}
+    sections={[
+      { title: "1 · Choose participant & receipt", description: "Upload a receipt by file picker or drag-and-drop. The supported source notes list PDF, JPEG, and Word documents; no Excel.", kind: "form", fields: [{ label: "Assigned participant", type: "select", options: ["Load worker assignments"] }, { label: "Receipt file", type: "file", placeholder: "PDF, JPEG, or Word document" }, { label: "Expense date", type: "date" }], action: "Upload receipt", callout: "Upload, storage, OCR, and persistence are not implemented. Use only fake test files." },
+      { title: "2 · Log expense details", description: "Mirror the PassportONE Log Expense flow; add the item to a draft batch before generating a month-end export.", kind: "form", fields: [{ label: "Vendor / expense description", type: "text" }, { label: "Amount", type: "number", placeholder: "0.00" }, { label: "Category", type: "select", options: ["Load category catalog"] }, { label: "Subcategory", type: "select", options: ["Show where category has subcategories"] }, { label: "Other category detail", type: "text", placeholder: "Required when Other is selected" }, { label: "Worker note", type: "textarea", placeholder: "Optional context for admin review" }], action: "+ Add Expense" },
+      { title: "PassportONE categories", description: "Category labels and subcategories transcribed from P1PictureInstructions.pdf. This is a UI reference; verify the live portal/template before export logic.", kind: "categories" },
+      { title: "Draft expense log", description: "Allow workers to manage only their own submissions; keep other-source expenses visible but read-only.", kind: "table", columns: ["Date", "Expense", "Category", "Amount", "Coverage", "Receipt", "Status"], emptyMessage: "Implement a removable/editable draft row list and submission workflow." },
+    ]}
+  />;
 }

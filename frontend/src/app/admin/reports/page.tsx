@@ -1,12 +1,22 @@
+import { PageStub } from "@/components/page-stub";
+
 export default function ReportsPage() {
-  return (
-    <>
-      <div className="page-heading"><div><p className="eyebrow">Month-end & audit support</p><h1>Reports & archives</h1><p>Prepare spending data and retrieve the documents behind it.</p></div></div>
-      <div className="content-grid">
-        <section className="panel report-card"><span className="report-icon">▦</span><p className="eyebrow">Ministry submission support</p><h2>Spending spreadsheet</h2><p>Prepare an Excel workbook shaped to the Ministry portal so Patty can review and copy/paste submissions.</p><label>Reporting period<select defaultValue="September 2026"><option>September 2026</option><option>August 2026</option></select></label><button className="button button-primary" disabled type="button">Export Excel · coming later</button><small>Requires the current Ministry spreadsheet template.</small></section>
-        <section className="panel report-card"><span className="report-icon report-icon-amber">▤</span><p className="eyebrow">Audit retrieval</p><h2>Receipt archive</h2><p>Download source receipts for a participant and date range to support audits and offline retention.</p><label>Participant<select defaultValue=""><option value="" disabled>Select a participant</option></select></label><div className="field-grid compact-fields"><label>From<input type="date" /></label><label>To<input type="date" /></label></div><button className="button button-secondary" disabled type="button">Download ZIP · coming later</button><small>Keep the source documents and their audit trail together.</small></section>
-      </div>
-      <p className="muted-copy report-footnote">Exports, receipt storage, and archive retention are not implemented in this scaffold. The seven-year offline retention requirement must be confirmed with Torchlight.</p>
-    </>
-  );
+  return <PageStub
+    audience="Torchlight Admin"
+    title="Month-end & audit records"
+    description="The office prepares expenses per participant each month for Patty to submit through the Ministry portal. The application should prepare a copy/paste-ready workbook and make receipt records easy to retrieve; it must not submit to PassportONE."
+    developerTasks={[
+      "Use the Ministry-provided spreadsheet template; map required fields and verify the generated workbook with client staff.",
+      "Generate one monthly export per participant with fiscal-year/backdated expense handling.",
+      "Provide a per-person receipt archive filtered by date range and optional category/amount.",
+      "Stream/download files safely for offline archival; record who generated an export or archive.",
+      "Display local workflow status separately from PassportONE invoice status; do not imply API submission.",
+    ]}
+    sections={[
+      { title: "Monthly expense export", description: "Prepare a workbook for staff review and manual entry into the PassportONE portal.", kind: "form", fields: [{ label: "Participant", type: "select", options: ["Load participants"] }, { label: "Fiscal year", type: "select", options: ["Current", "Prior"] }, { label: "Month", type: "select", options: ["Select month"] }, { label: "Export status", type: "select", options: ["Draft", "Ready for review", "Exported"] }], action: "Generate participant workbook", callout: "Use the current Ministry spreadsheet template. Patty remains the portal submitter; no direct ministry integration." },
+      { title: "Monthly submission tracker", description: "Track local preparation and manual submission progress per participant/month.", kind: "table", columns: ["Participant", "Period", "Expenses", "Receipts", "Export status", "Portal status", "Last updated"], emptyMessage: "Implement a separate internal tracker; do not claim portal status without user entry." },
+      { title: "Audit receipt archive", description: "Retrieve historical receipt files per participant and date range for offline retention and audit response.", kind: "form", fields: [{ label: "Participant", type: "select", options: ["Load participants"] }, { label: "From date", type: "date" }, { label: "To date", type: "date" }, { label: "Category filter", type: "select", options: ["All categories"] }, { label: "Amount filter", type: "number", placeholder: "Optional amount" }], action: "Download receipt archive" },
+      { title: "Audit files", description: "Keep receipts grouped in a predictable per-person, month-by-month structure.", kind: "table", columns: ["Period", "Participant", "Receipt count", "Archive created", "Created by", "Download"], emptyMessage: "Implement historical receipt indexing and downloadable archive bundles." },
+    ]}
+  />;
 }

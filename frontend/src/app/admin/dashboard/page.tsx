@@ -1,20 +1,22 @@
-import Link from "next/link";
-
-const metrics = [
-  { label: "Participants", value: "36", detail: "Illustrative current roster" },
-  { label: "Receipts to review", value: "8", detail: "Sample review queue" },
-  { label: "Export period", value: "September", detail: "Example reporting month" },
-];
+import { PageStub } from "@/components/page-stub";
 
 export default function AdminDashboard() {
-  return (
-    <>
-      <div className="page-heading"><div><p className="eyebrow">Office workspace</p><h1>Good morning, team.</h1><p>One place to review spending, keep records together, and prepare monthly submissions.</p></div><span className="period-chip">Sample overview</span></div>
-      <section className="summary-grid" aria-label="Sample admin summary">{metrics.map((metric) => <article className="summary-card" key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.detail}</small></article>)}</section>
-      <div className="content-grid">
-        <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Next actions</p><h2>Keep the month moving</h2></div><span className="icon-chip">✳</span></div><ul className="action-list"><li><span className="action-icon action-amber">◷</span><div><strong>Review receipts with uncertain details</strong><small>Sample queue · no real uploads</small></div><Link href="/admin/ocr-review">Review →</Link></li><li><span className="action-icon action-blue">↗</span><div><strong>Prepare monthly Ministry export</strong><small>Spreadsheet layout awaits client template</small></div><Link href="/admin/reports">Reports →</Link></li><li><span className="action-icon action-green">＋</span><div><strong>Check participant allocations</strong><small>Budgets and current rules need confirmed data</small></div><Link href="/admin/participants">Participants →</Link></li></ul></section>
-        <aside className="panel callout-panel"><span className="callout-mark">✦</span><p className="eyebrow">A useful reminder</p><h2>Review first.<br/>Submit with confidence.</h2><p>OCR can suggest receipt details, but staff should verify them before an expense is approved or included in an export.</p><Link className="text-link" href="/admin/ocr-review">Open review queue <span aria-hidden="true">↗</span></Link></aside>
-      </div>
-    </>
-  );
+  return <PageStub
+    audience="Torchlight Admin"
+    title="Admin dashboard"
+    description="The research flow calls for all-user access, a roster that opens an individual participant profile, recent activity, funding stats, and notes/messages that need follow-up."
+    developerTasks={[
+      "Load all authorized users and participants; support opening a selected participant profile.",
+      "Build recent activity from auditable events such as receipt uploads, expense updates, and invoice status changes.",
+      "Calculate funding amount, where funding is allocated, and funding spent from approved records.",
+      "Add a follow-up inbox for missing/unclear receipts and client/staff notes.",
+      "Keep all amounts and people sourced from the API; remove example counts and fake values.",
+    ]}
+    sections={[
+      { title: "Workspace at a glance", kind: "metrics", items: ["Users / participants", "Funding allocated", "Funding spent", "Needs follow-up"] },
+      { title: "All participants", description: "Select a person to open their funding and expense log.", kind: "table", columns: ["Participant", "Client code", "Funding", "Spent", "Available", "Follow-up"], emptyMessage: "Connect the admin-scoped participant directory; selecting a row should open its profile." },
+      { title: "Recent activity", description: "Examples from the research flow include who uploaded a document and when an invoice was sent.", kind: "table", columns: ["Time", "Person", "Activity", "Related record", "Actor"], emptyMessage: "Implement an activity feed from backend audit/activity records." },
+      { title: "Notes & messages", description: "Surface receipts and records that need staff follow-up.", kind: "table", columns: ["Date", "Participant", "Follow-up item", "Owner", "Status"], emptyMessage: "Implement follow-up notes and owner/status behavior." },
+    ]}
+  />;
 }

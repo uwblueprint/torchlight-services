@@ -1,27 +1,22 @@
-const categories = [
-  { name: "Community participation", remaining: "$1,240.00", spent: "$760.00", percent: 38, allocated: "$2,000.00" },
-  { name: "Transportation", remaining: "$485.00", spent: "$315.00", percent: 39, allocated: "$800.00" },
-  { name: "Technology", remaining: "$755.00", spent: "$245.00", percent: 25, allocated: "$1,000.00" },
-];
+import { PageStub } from "@/components/page-stub";
 
 export default function WorkerDashboard() {
-  return (
-    <>
-      <div className="page-heading"><div><p className="eyebrow">Assigned participant</p><h1>Your funding overview</h1><p>Illustrative participant data · not connected to Torchlight records</p></div><button className="button button-primary" type="button">Plan an activity <span aria-hidden="true">＋</span></button></div>
-      <section className="summary-grid" aria-label="Sample summary">
-        <article className="summary-card summary-highlight"><span>Available to plan</span><strong>$2,480.00</strong><small>Illustrative total across shown categories</small></article>
-        <article className="summary-card"><span>Assigned participants</span><strong>1</strong><small>Access will be assignment-scoped</small></article>
-        <article className="summary-card"><span>Needs a second look</span><strong>1 receipt</strong><small>Review flags are examples only</small></article>
-      </section>
-      <div className="content-grid">
-        <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Funding categories</p><h2>Remaining balances</h2></div><span className="period-chip">Sample fiscal year</span></div>
-          <div className="category-list">{categories.map((category) => <article className="category-row" key={category.name}><div className="category-title"><div><strong>{category.name}</strong><span>Sample allocated: {category.allocated}</span></div><strong>{category.remaining}</strong></div><div className="progress-track"><span style={{ width: `${category.percent}%` }} /></div><small>{category.percent}% shown as spent · {category.spent} sample</small></article>)}</div>
-        </section>
-        <section className="panel"><div className="panel-heading"><div><p className="eyebrow">Recent activity</p><h2>Transaction history</h2></div><span className="icon-chip">↗</span></div>
-          <ol className="transaction-list"><li><span className="transaction-dot dot-green"/><div><strong>Community art class</strong><small>Sep 28 · Community participation</small></div><b>−$48.00</b></li><li><span className="transaction-dot dot-blue"/><div><strong>Local transit</strong><small>Sep 25 · Transportation</small></div><b>−$12.50</b></li><li><span className="transaction-dot dot-amber"/><div><strong>Activity admission</strong><small>Sep 22 · Pending review</small></div><b>−$32.00</b></li></ol>
-          <div className="coverage-note"><span>◌</span><p><strong>Planning an activity?</strong><br/>Coverage estimates will use approved category and balance rules.</p></div>
-        </section>
-      </div>
-    </>
-  );
+  return <PageStub
+    audience="Passport Worker"
+    title="My participants"
+    description="Workers can search their own assigned participants, view balance and transaction information needed for planning, and start receipt or work-hour entry. The participant switcher and all records must remain assignment-scoped."
+    developerTasks={[
+      "Implement a worker-scoped participant search and selected-participant state shared across worker pages.",
+      "Show only necessary participant label/client code, not full profile or unrelated records.",
+      "Show current/prior two fiscal years of category allotment, spend, and available balance.",
+      "Show a bank-statement-style transaction history with receipt access and status.",
+      "Wire add expense, calculator, and work hours/mileage entry to the selected participant.",
+    ]}
+    sections={[
+      { title: "Find an assigned participant", description: "Search for a different assigned person, as shown in Research & flows.", kind: "form", fields: [{ label: "Participant", type: "search", placeholder: "Search your assigned participants" }], action: "Open participant view" },
+      { title: "Funding at a glance", description: "Participant switcher selection controls the balance/history shown below.", kind: "metrics", items: ["Allocated this fiscal year", "Spent this fiscal year", "Available to plan"] },
+      { title: "Category balances & transaction history", description: "Only funding and transaction information for the currently selected assigned participant.", kind: "table", columns: ["Date", "Expense / receipt", "Category", "Allocated", "Spent", "Available", "Status"], emptyMessage: "Connect assigned participant and expense/budget APIs; add fiscal-year selector." },
+      { title: "Quick actions", kind: "links", links: [{ label: "Upload receipt / add expense", href: "/worker/submit" }, { label: "Check activity coverage", href: "/worker/calculator" }, { label: "Record working hours or mileage", href: "/worker/shifts" }] },
+    ]}
+  />;
 }

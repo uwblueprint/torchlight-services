@@ -13,16 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Torchlight Passport Workspace",
-  description: "A shared workspace concept for Torchlight Passport funding workflows.",
+  title: "Torchlight Passport · Developer Handoff",
+  description: "Low-fidelity implementation stubs for the Torchlight Passport worker and admin workflows.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
