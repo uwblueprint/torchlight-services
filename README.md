@@ -57,11 +57,27 @@ cd backend && ruff check . && pytest
 cd frontend && npm run lint && npm run typecheck && npm run build
 ```
 
+## Delivery plan and project handoff
+
+The current ticket map is in [`backend/README.md`](backend/README.md); the frontend workstream and cross-team release sequence are in [`frontend/README.md`](frontend/README.md). Treat this as a dependency-ordered target plan, not a dated promise: the SOW estimates 8–12 months from September 23, 2026, and the client must confirm priorities, staffing, and dates.
+
+Recommended milestones:
+
+1. **Scope and unblock:** agree the MVP, authoritative category/cap rules, expense lifecycle, retention, access model, and current Ministry export template; confirm the hosting/security plan and board approval.
+2. **Build and verify:** implement the scoped frontend/backend tickets, migrations, authorization, auditability, receipts/OCR review, ledger, and required exports; verify with synthetic data and end-to-end tests.
+3. **Production readiness gate:** before loading real participant data, complete security/access review, secrets and TLS setup, backup/restore test, migration/release procedure, monitoring/incident contacts, retention plan, and a staff-approved pilot. Keep recurring infrastructure within the stated **$10–$20/month** budget target; this is a constraint to validate with an actual provider quote, not a guaranteed price. Track domain, email, backups, file storage, taxes, and any OCR/API charges separately so the total is transparent. If safe hosting cannot fit the cap, escalate for a budget/scope decision rather than weakening safeguards.
+4. **Launch, train, and showcase:** deploy only after the gate; run role-specific staff training using non-production examples, provide quick-reference and troubleshooting materials, and package a showcase demo/deck and technical overview that contain no real participant information or secrets.
+5. **Official handoff:** transfer ownership, access, operating/runbook and recovery procedures, data/export responsibilities, known limitations, support/escalation contacts, and a retraining path to Torchlight staff. Confirm staff can perform the routine tasks without Blueprint before marking autonomous operation complete.
+
+For a practical timeline, make production readiness and a small pilot prerequisites for broad staff training/showcase; hold the final autonomous-operation sign-off until after training and a supported run period. Schedule training, showcase preparation, and the handoff runbook in parallel with late implementation where possible, but do not equate a showcase demo with production readiness. See [`docs/decisions.md`](docs/decisions.md) for architecture decisions and open questions.
+
 ## Making the project actionable
 
 1. Open a feature/task issue using the GitHub templates. Include the user problem, explicit acceptance criteria, dependencies, and test expectations.
 2. Confirm business rules before encoding them (for example official category/cap lists, when expenses affect balances, OCR review/approval, retention, mileage/meal rules, and fee treatment).
 3. Link the issue in a focused PR; follow `CONTRIBUTING.md` and `.github/pull_request_template.md`.
+
+The prototype is not production-ready: do not enter real participant data until the readiness gate is approved and complete.
 
 ## Repository map
 
