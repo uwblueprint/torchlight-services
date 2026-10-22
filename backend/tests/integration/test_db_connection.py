@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator, Callable
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
@@ -26,9 +27,11 @@ def session_override(database_url: str) -> Callable[[], AsyncIterator[AsyncSessi
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async def override() -> AsyncIterator[AsyncSession]:
-        async with factory() as session:
-            yield session
-        await engine.dispose()
+        try:
+            async with factory() as session:
+                yield session
+        finally:
+            await engine.dispose()
 
     return override
 
@@ -40,7 +43,7 @@ async def get_health(database_url: str) -> tuple[int, dict[str, str]]:
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             response = await client.get("/api/v1/health")
     finally:
-        app.dependency_overrides.clear()
+        app.dependency_overrides.pop(get_session, None)
     return response.status_code, response.json()
 
 
@@ -51,6 +54,16 @@ async def test_health_returns_ok_with_live_database() -> None:
 
     assert status_code == 200
     assert body == {"status": "ok"}
+
+
+@pytest.mark.skipif(TEST_DATABASE_URL is None, reason="TEST_DATABASE_URL is not set")
+async def test_health_returns_503_when_live_database_rejects_credentials() -> None:
+    assert TEST_DATABASE_URL is not None
+    bad_url = make_url(TEST_DATABASE_URL).set(password="wrong-password")
+    status_code, body = await get_health(bad_url.render_as_string(hide_password=False))
+
+    assert status_code == 503
+    assert body == {"status": "error", "database": "unavailable"}
 
 
 @pytest.mark.parametrize("database_url", UNREACHABLE_DATABASE_URLS)

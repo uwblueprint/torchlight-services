@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from fastapi import APIRouter, Depends, status
@@ -14,6 +15,8 @@ from app.db.session import get_session
 
 logger = logging.getLogger(__name__)
 
+HEALTH_CHECK_TIMEOUT_SECONDS = 5
+
 router = APIRouter()
 router.include_router(participants_router)
 router.include_router(expenses_router)
@@ -24,9 +27,11 @@ router.include_router(reports_router)
 @router.get("/health", tags=["health"], response_model=None)
 async def health(session: AsyncSession = Depends(get_session)) -> dict[str, str] | JSONResponse:
     try:
-        await session.execute(text("SELECT 1"))
+        # Bounds the pool pre-ping and query too, not just opening a new connection.
+        async with asyncio.timeout(HEALTH_CHECK_TIMEOUT_SECONDS):
+            await session.execute(text("SELECT 1"))
     # asyncpg can raise raw OSError (e.g. DNS failure) that SQLAlchemy does not wrap.
-    except (SQLAlchemyError, OSError):
+    except (SQLAlchemyError, OSError, TimeoutError):
         logger.exception("Health check database query failed")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
