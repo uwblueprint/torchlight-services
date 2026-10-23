@@ -65,7 +65,31 @@ cd frontend && npm run lint && npm run typecheck && npm run build
 cd backend && TEST_DATABASE_URL=postgresql+asyncpg://torchlight:torchlight@localhost:5432/torchlight pytest tests/integration
 ```
 
-Run checks relevant to your changes before opening a PR. CI runs backend lint/tests and frontend lint/typecheck/build.
+Run checks relevant to your changes before opening a PR.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every pull request, merge queue, and push to `main`. A newer push cancels the older run for the same PR. Each job maps to commands you can run locally:
+
+| Check | What it runs |
+|---|---|
+| `backend` | `ruff check .`; `alembic upgrade head`, `alembic downgrade base`, `alembic upgrade head`, `alembic check` against a fresh PostgreSQL 16 service; then `pytest` with `TEST_DATABASE_URL` set |
+| `frontend` | `npm ci`, `npm run lint`, `npm run typecheck`, `npm run build` |
+| `docker` | `docker compose config --quiet`, `docker compose up --build --detach --wait`, then `curl` `GET /api/v1/health` until it returns 200 |
+
+- Every migration needs a working `downgrade()`, and `alembic check` fails if models in `Base.metadata` have changes without a migration. Generate one with `alembic revision --autogenerate`.
+- When `CI` is set, `pytest` refuses to start without `TEST_DATABASE_URL`, so a misconfigured CI database fails the job instead of silently skipping live-database tests.
+- To run the migration checks locally, point `DATABASE_URL` at a disposable database, not one with data you want to keep: `alembic downgrade base` drops everything.
+
+### Branch protection for `main`
+
+A repository admin configures these under **Settings → Rules → Rulesets** (or **Branches**):
+
+- Require a pull request before merging.
+- Require status checks to pass, and be up to date with `main`: `backend`, `frontend`, `docker`.
+- Block force pushes and deletions.
+
+If you rename or add a CI job, update the required checks in the same PR, or merges are blocked waiting for a check that never reports.
 
 ## Pull requests
 
