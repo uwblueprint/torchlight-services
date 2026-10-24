@@ -59,6 +59,12 @@ cd backend && ruff check . && pytest
 cd frontend && npm run lint && npm run typecheck && npm run build
 ```
 
+`backend/tests/integration` checks the health endpoint against real connections. The unreachable-database tests always run; the live database test is skipped unless `TEST_DATABASE_URL` is set. To run it against the Compose database (adjust the URL if you changed the `POSTGRES_*` values in `.env`):
+
+```bash
+cd backend && TEST_DATABASE_URL=postgresql+asyncpg://torchlight:torchlight@localhost:5432/torchlight pytest tests/integration
+```
+
 Run checks relevant to your changes before opening a PR. CI runs backend lint/tests and frontend lint/typecheck/build.
 
 ## Pull requests

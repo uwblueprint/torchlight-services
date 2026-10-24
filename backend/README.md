@@ -4,7 +4,7 @@ The backend currently contains the FastAPI app, PostgreSQL session setup, a data
 
 ## Suggested backend ticket order
 
-1. **INFRA-01 — Local API + PostgreSQL verification**: start the existing Compose services together; verify database connectivity and container reload. The current health test mocks the DB, so add a separate PostgreSQL integration test.
+1. **INFRA-01 — Local API + PostgreSQL verification**: start the existing Compose services together; verify database connectivity and container reload. Health returns 503 when the database is unavailable; `tests/integration/test_db_connection.py` covers live and unreachable databases.
 2. **DB-01 — Core schema and category catalog**: add reviewed Alembic models/migrations for users, participants, assignments, categories, subcategories, and funding allocations. The supplied PassportONE reference lists 19 categories while other project sources refer to 18; confirm this discrepancy and category/cap source before treating seed data as authoritative.
 3. **AUTH-01 — Authentication and role/assignment authorization**: enforce worker/admin access server-side before exposing participant or receipt data.
 4. **BE-01 — Budget calculator**: implement tested `Decimal` calculations; distinguish participant allocation remaining from category cap headroom. Do not embed unconfirmed fees or acknowledgment policies.
