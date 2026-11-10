@@ -33,6 +33,7 @@ Staff training, showcase packaging, and autonomous handoff follow successful rel
 | Ticket | Scope | Dependency / gate |
 |---|---|---|
 | INFRA-01 | Verify local API + PostgreSQL Compose stack and live DB health | None; local development only |
+| INFRA-02 | PR CI merge gate: live-DB tests, migration checks, Compose build/health smoke test | INFRA-01; repo admin applies branch protection |
 | DB-01 | Approved core schema, migrations, and category catalog | Resolve authoritative category/cap list before seeding |
 | AUTH-01 | Authentication, roles, and assignment-scoped authorization | Schema contract; required before real records |
 | BE-01 | Pure `Decimal` budget split calculator | Can overlap DB-01; approved ledger/cap rules required |
