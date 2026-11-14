@@ -67,6 +67,83 @@ cd backend && TEST_DATABASE_URL=postgresql+asyncpg://torchlight:torchlight@local
 
 Run checks relevant to your changes before opening a PR.
 
+## Frontend conventions
+
+These apply to every screen under `frontend/`. The worker and admin screens share one API
+contract, so a convention broken in one screen becomes a bug in another.
+
+### Money
+
+- Amounts cross the wire as decimal strings: `"1234.50"`, two decimals, no currency
+  symbol or thousands separators. Never JSON numbers — JS parses them as IEEE-754 doubles.
+- Format once from the string with `src/lib/money.ts`
+  (`Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" })`). Do not
+  `Number()` a value and re-format it.
+- No addition, subtraction, or comparison of money in the browser. Totals, balances, and
+  coverage estimates come from the API (BE-01 for estimates).
+- Request bodies send strings too. Server validation is the control; client validation is
+  a courtesy.
+
+### Collections
+
+```json
+{ "items": [], "total": 0, "next_cursor": null }
+```
+
+- Every collection uses `items`, including nested subresources. A single resource is a
+  bare object.
+- Reserve `total` and `next_cursor`; add paging to a list before it outgrows one screen.
+
+### Dates, IDs, fiscal year
+
+- Dates are `YYYY-MM-DD`; timestamps are ISO 8601 UTC with `Z`.
+- IDs are UUID strings. Unknown ID → 404; malformed ID → the API's 422 surfaced as an
+  error, not a blank screen.
+- `fiscal_year` is an integer query filter, never a write field: it is derived from the
+  expense date server-side (DB-01). The boundary is unconfirmed, so UI copy does not
+  assert one.
+
+### Data access
+
+- Next.js 16 App Router. Read the relevant guide in
+  `frontend/node_modules/next/dist/docs/` before writing code; this version's APIs and
+  conventions differ from earlier ones.
+- Server Components by default. `"use client"` only where handlers or interaction state
+  require it.
+- One typed client in `src/lib/api/`, one function per endpoint, shared types in
+  `src/lib/api/types.ts`. No `fetch` in components.
+- No client data/state library until a ticket justifies one, and say why in the PR.
+- Shareable state — selected participant, fiscal year, filters — goes in URL search
+  params.
+- Never store session tokens in `localStorage`; AUTH-01 chooses the mechanism.
+
+### Every data screen
+
+- Loading skeleton; empty state that says what is missing and offers the primary action;
+  error with retry; unauthorized redirect or 403; dedicated 404 for record routes.
+- No optimistic updates for money: save, refetch, render server truth.
+- Labels bound with `htmlFor`; keyboard reachable with visible focus; a navigating table
+  row contains a real link; status is never colour-only; `aria-live="polite"` for async
+  results.
+- Worker screens are mobile-first; admin screens stay usable at 1280px and above.
+
+### Boundaries
+
+- No PassportONE submission, payment processing, or OCR auto-approval (decisions.md 4–5).
+- Synthetic fixtures only: no names, amounts, receipts, or records from source documents or
+  real participants (decisions.md 6).
+- Hiding a control is not authorization. The API enforces access, and server-rendered pages
+  re-check before rendering protected data.
+
+### Verification
+
+```bash
+cd frontend && npm run lint && npm run typecheck && npm run build
+```
+
+There is no frontend test runner yet. A PR that adds one names the runner and covers its
+logic in the same change.
+
 ## CI
 
 `.github/workflows/ci.yml` runs on every pull request, merge queue, and push to `main`. A newer push cancels the older run for the same PR. Each job maps to commands you can run locally:

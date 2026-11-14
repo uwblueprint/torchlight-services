@@ -22,6 +22,23 @@ npm run build
 ## Frontend ticket and release sequence
 
 - **FE-01 — Frontend MVP and workflow implementation:** agree the user-facing MVP with Torchlight, turn the current page stubs into the selected worker/admin flows, integrate only the authorized API contracts, and test responsive layouts plus loading, empty, validation, and error states. The current fabricated-data previews are not finished or production-connected functionality. Coordinate scope and dependencies with the backend ticket map in [`../backend/README.md`](../backend/README.md).
+
+Screen tickets, one per route in the current stub set. Shared money, list, state, and authorization rules live in the [frontend conventions](../CONTRIBUTING.md#frontend-conventions).
+
+| Ticket | Screen | Route |
+|---|---|---|
+| FE-02 | Worker onboarding | `/onboarding` |
+| FE-03 | Sign-in, session, and role routing | `/login`, `/` |
+| FE-04 | Funding & activity | `/worker/dashboard` |
+| FE-05 | Add an expense | `/worker/submit` |
+| FE-06 | Hours & mileage | `/worker/shifts` |
+| FE-07 | Coverage calculator | `/worker/calculator` |
+| FE-08 | Admin overview | `/admin/dashboard` |
+| FE-09 | Participant directory | `/admin/participants` |
+| FE-10 | Participant workspace | `/admin/participants/[id]` |
+| FE-11 | Receipt follow-up & categorization | `/admin/ocr-review` |
+| FE-12 | Overages & invoice tracking | `/admin/invoicing` |
+| FE-13 | Month-end exports & receipt archive | `/admin/reports` |
 - **Release readiness:** production deployment is gated on backend authorization, privacy/security review, deployment/migration procedure, managed secrets, TLS, tested backup/restore, operational monitoring, and a staff-approved pilot. Hosting has a target of $10–$20/month, not a confirmed quote; include database, receipt storage, backups, domain/email, taxes, and OCR/API services in the total-cost check.
 - **Training, showcase, and handoff:** prepare role-specific training and quick-reference materials, a sanitized showcase demo/deck and technical overview, then transfer the runbook, operational ownership, backup/recovery and data-retention responsibilities, access procedures, and escalation contacts. Train against a stable pilot; do not use real participant details in showcase materials. Torchlight staff should demonstrate routine autonomous operation before final handoff sign-off.
 
