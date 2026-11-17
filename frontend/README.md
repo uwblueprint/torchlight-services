@@ -1,6 +1,6 @@
 # Torchlight web app
 
-This Next.js app contains navigable worker and admin workflow previews using fabricated sample values only. It is not connected to the API and must not be used with real participant information.
+This Next.js app contains navigable worker and admin workflow previews using fabricated sample values only. Pages are not wired to the API yet; the typed client they will use is in `src/lib/api/`. Do not use the app with real participant information.
 
 ## Run
 
@@ -10,6 +10,16 @@ npm run dev
 ```
 
 Open <http://localhost:3000>. Worker routes are under `/worker`; admin previews are under `/admin`.
+
+## API and fixtures
+
+Copy `.env.example` to `.env.local`.
+
+- `BACKEND_URL` (default `http://localhost:8000`): the FastAPI backend. Browser requests to `/api/v1/*` are proxied there, and server-side calls use it directly. It is read when `next.config.ts` loads, so production builds must set it at build time.
+- `NEXT_PUBLIC_USE_MOCKS=true`: `npm run dev` serves the fictional fixtures in `src/lib/api/fixtures.ts` instead of calling the backend. Requests without a fixture fail with 501, like an unbuilt route.
+- `npm run build` refuses to run while `NEXT_PUBLIC_USE_MOCKS=true`, so fixtures cannot ship.
+
+With mocks off, a failed or malformed response throws `ApiError` or `ApiResponseError`; it never falls back to fixtures.
 
 ## Checks
 

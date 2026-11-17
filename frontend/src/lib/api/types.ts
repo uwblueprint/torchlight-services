@@ -1,4 +1,4 @@
-// Decimal string like "1234.50"; never convert to a number or do math on it.
+// Non-negative decimal string with two places, like "1234.50"; never convert to a number or do math on it.
 export type Money = string & { readonly __brand: "Money" };
 
 export type IsoDate = string;
@@ -72,6 +72,8 @@ export type ExpenseRecord = {
 
 export type ListResponse<T> = {
   items: T[];
+  total: number;
+  next_cursor: string | null;
 };
 
 export type ValidationIssue = {

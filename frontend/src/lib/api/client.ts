@@ -1,6 +1,6 @@
 import { ApiError, ApiResponseError } from "@/lib/api/errors";
 import { categoryBalanceList, errorDetail, expenseList, participantList } from "@/lib/api/parse";
-import type { CategoryBalance, ExpenseRecord, FiscalYear, ParticipantSummary } from "@/lib/api/types";
+import type { CategoryBalance, ExpenseRecord, FiscalYear, ListResponse, ParticipantSummary } from "@/lib/api/types";
 
 export type ApiTransport = (path: string) => Promise<unknown>;
 
@@ -43,17 +43,17 @@ async function get(path: string): Promise<unknown> {
   return (await transport())(path);
 }
 
-export async function listParticipants(): Promise<ParticipantSummary[]> {
+export async function listParticipants(): Promise<ListResponse<ParticipantSummary>> {
   const path = "/participants";
-  return participantList(await get(path), path).items;
+  return participantList(await get(path), path);
 }
 
-export async function listCategoryBalances(participantId: string, fiscalYear: FiscalYear): Promise<CategoryBalance[]> {
+export async function listCategoryBalances(participantId: string, fiscalYear: FiscalYear): Promise<ListResponse<CategoryBalance>> {
   const path = `/participants/${encodeURIComponent(participantId)}/balances?fiscal_year=${fiscalYear}`;
-  return categoryBalanceList(await get(path), path).items;
+  return categoryBalanceList(await get(path), path);
 }
 
-export async function listExpenses(participantId: string, fiscalYear: FiscalYear): Promise<ExpenseRecord[]> {
+export async function listExpenses(participantId: string, fiscalYear: FiscalYear): Promise<ListResponse<ExpenseRecord>> {
   const path = `/participants/${encodeURIComponent(participantId)}/expenses?fiscal_year=${fiscalYear}`;
-  return expenseList(await get(path), path).items;
+  return expenseList(await get(path), path);
 }

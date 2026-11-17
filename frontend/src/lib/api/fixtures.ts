@@ -109,7 +109,7 @@ const expenses: ExpenseRecord[] = [
 ];
 
 function list<T>(items: T[]): ListResponse<T> {
-  return { items };
+  return { items, total: items.length, next_cursor: null };
 }
 
 function findParticipant(id: string): ParticipantSummary {

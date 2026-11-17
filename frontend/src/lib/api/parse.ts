@@ -15,8 +15,8 @@ import {
 
 type Parser<T> = (value: unknown, field: string) => T;
 
-// Plain decimals only; scientific notation like "1E+3" is rejected.
-const MONEY_PATTERN = /^-?\d+(\.\d+)?$/;
+// Exactly two decimals, so an off-spec value fails here instead of being rounded on screen.
+const MONEY_PATTERN = /^\d+\.\d{2}$/;
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 // Aware datetimes only, as Pydantic emits them.
 const DATETIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
@@ -38,7 +38,7 @@ const integer: Parser<number> = (value, field) => {
 
 const money: Parser<Money> = (value, field) => {
   if (typeof value !== "string" || !MONEY_PATTERN.test(value)) {
-    throw new ApiResponseError(field, 'expected a decimal string like "12.34"');
+    throw new ApiResponseError(field, 'expected a non-negative decimal string with two places, like "12.34"');
   }
   return value as Money;
 };
@@ -92,14 +92,19 @@ function object<T>(shape: { [K in keyof T]-?: Parser<T[K]> }): Parser<T> {
   };
 }
 
+const count: Parser<number> = (value, field) => {
+  const parsed = integer(value, field);
+  if (parsed < 0) throw new ApiResponseError(field, "expected a non-negative integer");
+  return parsed;
+};
+
+const items = <T>(item: Parser<T>): Parser<T[]> => (value, field) => {
+  if (!Array.isArray(value)) throw new ApiResponseError(field, "expected an array");
+  return value.map((entry, index) => item(entry, `${field}[${index}]`));
+};
+
 function list<T>(item: Parser<T>): Parser<ListResponse<T>> {
-  return (value, field) => {
-    if (typeof value !== "object" || value === null || !Array.isArray((value as { items?: unknown }).items)) {
-      throw new ApiResponseError(field, "expected { items: [...] }");
-    }
-    const items = (value as { items: unknown[] }).items;
-    return { items: items.map((entry, index) => item(entry, `${field}.items[${index}]`)) };
-  };
+  return object<ListResponse<T>>({ items: items(item), total: count, next_cursor: nullable(string) });
 }
 
 export const participantSummary = object<ParticipantSummary>({
