@@ -1,9 +1,10 @@
 // Fictional data only. Output still goes through parse.ts, so fixtures can't drift.
 import type { ApiTransport } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
-import type { CategoryBalance, ExpenseRecord, ListResponse, Money, ParticipantSummary } from "@/lib/api/types";
+import type { CategoryBalance, ExpenseRecord, ListResponse, Money, ParticipantSummary, SignedMoney } from "@/lib/api/types";
 
 const money = (value: string) => value as Money;
+const signedMoney = (value: string) => value as SignedMoney;
 
 const participants: ParticipantSummary[] = [
   { id: "00000000-0000-4000-8000-000000000001", display_name: "Alex Sample", client_code: "DEMO-001", is_active: true },
@@ -21,7 +22,7 @@ const balances: Record<string, CategoryBalance[]> = {
       allocated_amount: money("1500.00"),
       projected_amount: money("1200.00"),
       spent_amount: money("342.75"),
-      remaining_amount: money("1157.25"),
+      remaining_amount: signedMoney("1157.25"),
     },
     {
       category_id: "00000000-0000-4000-8000-0000000000c7",
@@ -31,7 +32,17 @@ const balances: Record<string, CategoryBalance[]> = {
       allocated_amount: money("2000.00"),
       projected_amount: money("2000.00"),
       spent_amount: money("0.00"),
-      remaining_amount: money("2000.00"),
+      remaining_amount: signedMoney("2000.00"),
+    },
+    {
+      category_id: "00000000-0000-4000-8000-0000000000c8",
+      category_code: "19",
+      category_name: "Other types, please specify",
+      fiscal_year: 2026,
+      allocated_amount: money("500.00"),
+      projected_amount: money("500.00"),
+      spent_amount: money("625.00"),
+      remaining_amount: signedMoney("-125.00"),
     },
   ],
   "00000000-0000-4000-8000-000000000002": [
@@ -43,7 +54,7 @@ const balances: Record<string, CategoryBalance[]> = {
       allocated_amount: money("800.00"),
       projected_amount: money("600.00"),
       spent_amount: money("125.50"),
-      remaining_amount: money("674.50"),
+      remaining_amount: signedMoney("674.50"),
     },
   ],
 };

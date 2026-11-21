@@ -1,6 +1,9 @@
 // Non-negative decimal string with two places, like "1234.50"; never convert to a number or do math on it.
 export type Money = string & { readonly __brand: "Money" };
 
+// Signed decimal string with two places, like "-125.00"; used only for computed remainders that may go below zero.
+export type SignedMoney = string & { readonly __brand: "SignedMoney" };
+
 export type IsoDate = string;
 
 export type IsoDateTime = string;
@@ -37,7 +40,8 @@ export type CategoryBalance = {
   allocated_amount: Money;
   projected_amount: Money;
   spent_amount: Money;
-  remaining_amount: Money;
+  // Negative when confirmed spending exceeds the allocation; do not clamp.
+  remaining_amount: SignedMoney;
 };
 
 export const expenseStatuses = ["draft", "awaiting_worker_confirmation", "confirmed", "rejected", "voided"] as const;

@@ -9,6 +9,7 @@ import {
   type ExpenseRecord,
   type ListResponse,
   type Money,
+  type SignedMoney,
   type ParticipantSummary,
   type ValidationIssue,
 } from "@/lib/api/types";
@@ -17,6 +18,7 @@ type Parser<T> = (value: unknown, field: string) => T;
 
 // Exactly two decimals, so an off-spec value fails here instead of being rounded on screen.
 const MONEY_PATTERN = /^\d+\.\d{2}$/;
+const SIGNED_MONEY_PATTERN = /^-?\d+\.\d{2}$/;
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 // Aware datetimes only, as Pydantic emits them.
 const DATETIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
@@ -41,6 +43,13 @@ const money: Parser<Money> = (value, field) => {
     throw new ApiResponseError(field, 'expected a non-negative decimal string with two places, like "12.34"');
   }
   return value as Money;
+};
+
+const signedMoney: Parser<SignedMoney> = (value, field) => {
+  if (typeof value !== "string" || !SIGNED_MONEY_PATTERN.test(value)) {
+    throw new ApiResponseError(field, 'expected a decimal string with two places, like "12.34" or "-12.34"');
+  }
+  return value as SignedMoney;
 };
 
 const isoDate: Parser<string> = (value, field) => {
@@ -122,7 +131,7 @@ export const categoryBalance = object<CategoryBalance>({
   allocated_amount: money,
   projected_amount: money,
   spent_amount: money,
-  remaining_amount: money,
+  remaining_amount: signedMoney,
 });
 
 export const expenseRecord = object<ExpenseRecord>({
