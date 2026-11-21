@@ -1,11 +1,11 @@
 # Backend implementation map
 
-The backend currently contains the FastAPI app, PostgreSQL session setup, a database-backed health route, and ticket stubs/contracts. The modules below do not define a production schema or implement application workflows. The participant, expense, receipt, and report stub routes are mounted and return HTTP 501. No participant records, categories, receipts, or business rules are seeded.
+The backend currently contains the FastAPI app, PostgreSQL session setup, a database-backed health route, the DB-01 core schema (`app/db/models/`, migration `alembic/versions/0001_db_01_core_schema.py`), and ticket stubs/contracts. No application workflow uses the schema yet: the participant, expense, receipt, and report stub routes are mounted and return HTTP 501. Only the funding category catalog is seeded; no participant records, receipts, caps, or business rules are.
 
 ## Suggested backend ticket order
 
 1. **INFRA-01 — Local API + PostgreSQL verification**: start the existing Compose services together; verify database connectivity and container reload. Health returns 503 when the database is unavailable; `tests/integration/test_db_connection.py` covers live and unreachable databases.
-2. **DB-01 — Core schema and category catalog**: add reviewed Alembic models/migrations for users, participants, assignments, categories, subcategories, and funding allocations. Model 18 canonical funded Ministry categories; the PDF's 19th numbered choice, “Other types, please specify,” is a separate expense classification with required free text, not a category row. Confirm the transcribed names/codes and map workbook transaction-label variants before seeding; confirm cap rules and funding sources separately. Table list and constraints: [`docs/tickets/DB-01.md`](../docs/tickets/DB-01.md).
+2. **DB-01 — Core schema and category catalog** (implemented): twelve tables in one Alembic migration. `funding_categories` seeds 19 rows: the PDF's items 1–12 and 14–19 plus “Other types (please specify)” as `p1-13`, a real category row so it can carry an allocation; its expenses describe themselves in `other_category_desc`. Caps (`default_annual_cap`) stay NULL until Torchlight confirms them. The transcribed names still need checking against the source PDF, and workbook transaction-label variants still need mapping. Table list and constraints: [`docs/tickets/DB-01.md`](../docs/tickets/DB-01.md).
 3. **AUTH-01 — Authentication and role/assignment authorization**: enforce worker/admin access server-side before exposing participant or receipt data.
 4. **BE-01 — Budget calculator**: implement tested `Decimal` calculations; distinguish participant allocation remaining from category cap headroom. Do not embed unconfirmed fees or acknowledgment policies.
 5. **AUDIT-LOG-01 — Audit event persistence**: store actor/action/entity/time for sensitive changes without logging receipt bytes, OCR text, secrets, or unnecessary PII.
@@ -34,7 +34,7 @@ Staff training, showcase packaging, and autonomous handoff follow successful rel
 |---|---|---|
 | INFRA-01 | Verify local API + PostgreSQL Compose stack and live DB health | None; local development only |
 | INFRA-02 | PR CI merge gate: live-DB tests, migration checks, Compose build/health smoke test | INFRA-01; repo admin applies branch protection |
-| DB-01 | Approved core schema, migrations, and category catalog | Resolve authoritative category/cap list before seeding |
+| DB-01 | Core schema, migration, and category catalog (implemented) | Category names to confirm; caps and admin-fee rule unconfirmed |
 | AUTH-01 | Authentication, roles, and assignment-scoped authorization | Schema contract; required before real records |
 | BE-01 | Pure `Decimal` budget split calculator | Can overlap DB-01; approved ledger/cap rules required |
 | AUDIT-LOG-01 | Persist sensitive-action audit events | Schema and actor identity contract |

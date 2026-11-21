@@ -9,7 +9,7 @@ An early-stage web application scaffold for Passport funding workflows, includin
 - **Local development:** Docker Compose PostgreSQL + API; frontend runs locally with npm.
 - **Contributor workflow:** CI, PR checklist, feature/task issue forms, and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The worker/admin pages are **prototype UI only**. Authentication, roles, participant records, migrations, receipt upload/OCR, the expense ledger, budgets, Ministry exports, audit ZIPs, invoices, and payment processing are not implemented. Do not enter real participant data. The Compose credentials are local development defaults only and must never be used in production.
+The worker/admin pages are **prototype UI only**. The core database schema and funding category catalog exist (DB-01), but no API reads or writes them yet. Authentication, roles, participant records, receipt upload/OCR, the expense ledger, budgets, Ministry exports, audit ZIPs, invoices, and payment processing are not implemented. Do not enter real participant data. The Compose credentials are local development defaults only and must never be used in production.
 
 ## Prerequisites
 
