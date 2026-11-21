@@ -153,6 +153,34 @@ async def test_migration_creates_exactly_the_twelve_application_tables(
     assert {name for (name,) in rows} == APPLICATION_TABLES | {"alembic_version"}
 
 
+async def test_every_table_has_row_level_security(conn: AsyncConnection) -> None:
+    # Also catches a table added by a later migration that forgets to enable RLS.
+    rows = await conn.execute(
+        text(
+            "SELECT relname FROM pg_class "
+            "WHERE relnamespace = 'public'::regnamespace AND relkind = 'r' AND NOT relrowsecurity"
+        )
+    )
+    assert rows.scalars().all() == []
+
+
+async def test_roles_other_than_the_owner_can_neither_read_nor_write(
+    conn: AsyncConnection,
+) -> None:
+    await add_participant(conn)
+    # Mirrors Supabase, which grants `anon` and `authenticated` full access to `public` tables.
+    await conn.execute(text("CREATE ROLE rls_probe NOLOGIN"))
+    await conn.execute(text("GRANT USAGE ON SCHEMA public TO rls_probe"))
+    await conn.execute(text("GRANT SELECT, INSERT ON participants TO rls_probe"))
+    await conn.execute(text("SET LOCAL ROLE rls_probe"))
+
+    visible = await conn.execute(select(func.count()).select_from(Participant))
+    assert visible.scalar_one() == 0
+    await assert_rejected(
+        conn, insert(Participant).values(display_name="Probe"), "row-level security policy"
+    )
+
+
 async def test_category_cap_cannot_be_negative(conn: AsyncConnection) -> None:
     statement = insert(FundingCategory).values(
         code="test-negative-cap", name="Test", default_annual_cap=Decimal("-0.01")

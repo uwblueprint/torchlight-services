@@ -1,4 +1,4 @@
-"""DB-01 core schema: twelve tables, the funding category catalog, and append-only audit events.
+"""DB-01 core schema: twelve tables, category catalog, append-only audit events, and RLS.
 
 Revision ID: 0001
 Revises:
@@ -113,6 +113,30 @@ def make_audit_events_append_only() -> None:
         "CREATE TRIGGER audit_events_no_update_delete BEFORE UPDATE OR DELETE ON audit_events "
         "FOR EACH ROW EXECUTE FUNCTION audit_events_reject_change()"
     )
+
+
+# Supabase exposes `public` through its REST API with grants to `anon` and `authenticated`.
+# RLS with no policies denies every role except the table owner, which the backend connects as.
+RLS_TABLES = [
+    "users",
+    "participants",
+    "participant_assignments",
+    "participant_budgets",
+    "category_allocations",
+    "funding_categories",
+    "funding_subcategories",
+    "expenses",
+    "receipts",
+    "shift_logs",
+    "activity_plans",
+    "audit_events",
+    "alembic_version",  # otherwise an API caller could rewrite the migration state
+]
+
+
+def enable_row_level_security() -> None:
+    for table in RLS_TABLES:
+        op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
 
 
 def upgrade() -> None:
@@ -551,10 +575,13 @@ def upgrade() -> None:
         "ix_expenses_review_queue", "expenses", ["review_status", "created_at"], unique=False
     )
     make_audit_events_append_only()
+    enable_row_level_security()
     seed_funding_catalog()
 
 
 def downgrade() -> None:
+    # alembic_version outlives `downgrade base`; the other tables take their RLS flag with them.
+    op.execute("ALTER TABLE alembic_version DISABLE ROW LEVEL SECURITY")
     op.drop_index("ix_expenses_review_queue", table_name="expenses")
     op.drop_index("ix_expenses_balance", table_name="expenses")
     op.drop_table("expenses")
