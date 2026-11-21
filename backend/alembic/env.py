@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+import app.db.models  # noqa: F401  (registers every table on Base.metadata for autogenerate/check)
 from alembic import context
 from app.core.config import get_settings
 from app.db.base import Base
