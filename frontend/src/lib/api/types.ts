@@ -90,3 +90,34 @@ export type ValidationIssue = {
 export type ApiErrorBody = {
   detail: string | ValidationIssue[];
 };
+
+// AUTH-01 owns the approved-domain list; the screen only renders what the API returns.
+export type OnboardingSettings = {
+  approved_email_domains: string[];
+  training_material: string;
+  resend_available: boolean;
+};
+
+export type TrainingAcknowledgement = {
+  acknowledged_at: IsoDateTime;
+  material: string;
+  acknowledged_by_name: string;
+  recorded_by_name: string;
+  audit_event_id: string;
+};
+
+export type OnboardingUser = User & {
+  invited_at: IsoDateTime;
+  open_assignment_count: number;
+  training_acknowledgement: TrainingAcknowledgement | null;
+};
+
+export type OnboardingOverview = OnboardingSettings & {
+  users: ListResponse<OnboardingUser>;
+};
+
+export type InviteWorkerInput = {
+  email: string;
+  display_name: string;
+  role: UserRole;
+};

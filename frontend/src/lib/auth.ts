@@ -1,0 +1,26 @@
+import { forbidden } from "next/navigation";
+import { mocksEnabled } from "@/lib/api/client";
+import type { User } from "@/lib/api/types";
+
+const DEMO_ADMIN: User = {
+  id: "00000000-0000-4000-8000-000000000100",
+  display_name: "Demo Admin",
+  email: "admin@torchlight.example",
+  role: "admin",
+  status: "active",
+};
+
+// AUTH-01 seam: replace this with the server-side Supabase session lookup. Until then,
+// only the fixture-backed development preview has an administrator.
+export async function getAdminSession(): Promise<User | null> {
+  if (mocksEnabled) return DEMO_ADMIN;
+  return null;
+}
+
+export async function requireAdmin(): Promise<User> {
+  const user = await getAdminSession();
+  if (!user || user.role !== "admin" || user.status !== "active") {
+    forbidden();
+  }
+  return user;
+}
