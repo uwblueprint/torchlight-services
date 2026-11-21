@@ -197,6 +197,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .onboarding-panel-heading p { margin: 6px 0 0; color: var(--color-text-secondary); font-size: 11px; line-height: 1.55; }
 .onboarding-count-badge { flex: 0 0 auto; border: 1px solid var(--color-border-strong); border-radius: 999px; background: var(--color-bg-chip); padding: 5px 8px; color: var(--color-text-secondary); font-family: var(--font-geist-mono), monospace; font-size: 8px; }
 .onboarding-secondary-link, .onboarding-text-link, .onboarding-row-link { color: var(--blue); font-size: 11px; font-weight: 700; }
+.onboarding-panel-heading > .onboarding-secondary-link { flex: 0 0 auto; white-space: nowrap; }
 .onboarding-worker-list { display: grid; gap: 0; }
 .onboarding-worker { padding: 20px; }
 .onboarding-worker + .onboarding-worker { border-top: 1px solid var(--color-border-default); }
