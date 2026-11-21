@@ -2,18 +2,18 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import CheckConstraint, Index, text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.common import UUIDPrimaryKey, created_at, fk
+from app.db.models.common import UUIDPrimaryKey, created_at
 
 
 class AuditEvent(UUIDPrimaryKey, Base):
     """Append-only record of a sensitive action; the only history table.
 
-    Review decisions, corrections, and voids are recorded here and nowhere else. Database
-    triggers (created in the DB-01 migration) reject UPDATE, DELETE, and TRUNCATE.
+    Review decisions, corrections, and voids are recorded here and nowhere else. A database
+    trigger (created in the DB-01 migration) rejects UPDATE and DELETE.
     `safe_details` must not hold receipt contents, OCR text, secrets, or unnecessary personal
     information.
     """
@@ -26,7 +26,7 @@ class AuditEvent(UUIDPrimaryKey, Base):
     )
 
     # NULL for system actions with no signed-in user.
-    actor_user_id: Mapped[uuid.UUID | None] = mapped_column(fk("users.id"))
+    actor_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str]
     entity_type: Mapped[str]
     entity_id: Mapped[uuid.UUID | None]

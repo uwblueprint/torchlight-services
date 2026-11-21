@@ -2,18 +2,18 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, Numeric, UniqueConstraint, text
+from sqlalchemy import CheckConstraint, ForeignKey, Numeric, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.common import UUIDPrimaryKey, created_at, fk
+from app.db.models.common import UUIDPrimaryKey, created_at
 
 
 class FundingCategory(UUIDPrimaryKey, Base):
     """A Ministry Passport funding category (seeded catalog).
 
-    `code` is stable (`p1-NN`, the Ministry form's item number); never reuse a code for a
-    different concept. Retire a category with `active = false` and add a new row instead.
+    `code` is stable (`p1-NN`); never reuse a code for a different concept. Retire a category
+    with `active = false` and add a new row instead.
     """
 
     __tablename__ = "funding_categories"
@@ -39,7 +39,7 @@ class FundingSubcategory(UUIDPrimaryKey, Base):
         UniqueConstraint("id", "category_id"),
     )
 
-    category_id: Mapped[uuid.UUID] = mapped_column(fk("funding_categories.id"))
+    category_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("funding_categories.id"))
     name: Mapped[str]
     active: Mapped[bool] = mapped_column(server_default=text("true"))
 
@@ -47,8 +47,7 @@ class FundingSubcategory(UUIDPrimaryKey, Base):
 class ParticipantBudget(UUIDPrimaryKey, Base):
     """One participant's annual Passport budget.
 
-    `fiscal_year` is an integer label derived server-side from dates, never accepted from a
-    client; the fiscal-year boundary is not yet confirmed.
+    `fiscal_year` is an integer label; the fiscal-year boundary is not yet confirmed.
     """
 
     __tablename__ = "participant_budgets"
@@ -61,7 +60,7 @@ class ParticipantBudget(UUIDPrimaryKey, Base):
         ),
     )
 
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
     fiscal_year: Mapped[int]
     managing_agency: Mapped[str]
     total_budget: Mapped[Decimal]
@@ -75,8 +74,7 @@ class CategoryAllocation(UUIDPrimaryKey, Base):
 
     One row per category is materialized when the budget is created, so a balance query never
     falls back to a default. The category's default_annual_cap only pre-fills the amount; while it
-    is NULL (unconfirmed) the admin enters the allocation. Allocations belong to their budget and
-    are deleted with it.
+    is NULL (unconfirmed) the admin enters the allocation.
     """
 
     __tablename__ = "category_allocations"
@@ -86,9 +84,7 @@ class CategoryAllocation(UUIDPrimaryKey, Base):
         CheckConstraint("projected_amount >= 0", name="projected_amount_nonnegative"),
     )
 
-    participant_budget_id: Mapped[uuid.UUID] = mapped_column(
-        fk("participant_budgets.id", ondelete="CASCADE")
-    )
-    category_id: Mapped[uuid.UUID] = mapped_column(fk("funding_categories.id"))
+    participant_budget_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participant_budgets.id"))
+    category_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("funding_categories.id"))
     allocated_amount: Mapped[Decimal]
     projected_amount: Mapped[Decimal]

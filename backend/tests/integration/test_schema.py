@@ -68,7 +68,6 @@ def migrated_database() -> None:
         cwd=BACKEND_DIR,
         env={**os.environ, "DATABASE_URL": TEST_DATABASE_URL or ""},
         check=True,
-        capture_output=True,
     )
 
 
@@ -135,6 +134,7 @@ def expense_values(participant_id: uuid.UUID, **overrides: Any) -> dict[str, Any
         "total_amount": Decimal("100.00"),
         "covered_amount": Decimal("80.00"),
         "out_of_pocket_amount": Decimal("20.00"),
+        "status": "draft",
         "review_status": "pending",
         "invoice_status": "none",
     }
@@ -215,16 +215,16 @@ async def test_invalid_users_are_rejected(
     await assert_rejected(conn, insert(User).values(**{**values, **overrides}), constraint)
 
 
-async def test_user_defaults_and_unique_email(conn: AsyncConnection) -> None:
-    user_id = await add(conn, User, display_name="New", email="new@example.org", role="admin")
-    status = await conn.execute(select(User.status).where(User.id == user_id))
-    assert status.scalar_one() == "invited"
-
-    duplicate = insert(User).values(display_name="Dup", email="new@example.org", role="admin")
+async def test_user_email_is_unique_and_deactivation_needs_a_timestamp(
+    conn: AsyncConnection,
+) -> None:
+    await add_user(conn, email="new@example.org")
+    duplicate = insert(User).values(
+        display_name="Dup", email="new@example.org", role="admin", status="invited"
+    )
     await assert_rejected(conn, duplicate, "uq_users_email")
 
-    deactivated = await add_user(conn, status="deactivated", deactivated_at=datetime.now(UTC))
-    assert deactivated is not None
+    await add_user(conn, status="deactivated", deactivated_at=datetime.now(UTC))
 
 
 async def test_participant_client_code_is_unique_but_optional(conn: AsyncConnection) -> None:
@@ -322,7 +322,7 @@ async def test_invalid_budgets_are_rejected(
     )
 
 
-async def test_allocations_are_unique_per_category_and_deleted_with_their_budget(
+async def test_allocations_are_unique_per_category_and_keep_their_budget(
     conn: AsyncConnection,
 ) -> None:
     budget_id = await add(
@@ -357,9 +357,11 @@ async def test_allocations_are_unique_per_category_and_deleted_with_their_budget
         "ck_category_allocations_projected_amount_nonnegative",
     )
 
-    await conn.execute(delete(ParticipantBudget).where(ParticipantBudget.id == budget_id))
-    remaining = await conn.execute(select(func.count()).select_from(CategoryAllocation))
-    assert remaining.scalar_one() == 0
+    await assert_rejected(
+        conn,
+        delete(ParticipantBudget).where(ParticipantBudget.id == budget_id),
+        "fk_category_allocations_participant_budget_id",
+    )
 
 
 async def test_participant_with_financial_records_cannot_be_deleted(
@@ -426,7 +428,7 @@ async def test_invalid_expenses_are_rejected(
     await assert_rejected(conn, insert(Expense).values(**values), constraint)
 
 
-async def test_valid_expense_defaults_and_exact_money(conn: AsyncConnection) -> None:
+async def test_valid_expenses_keep_exact_money(conn: AsyncConnection) -> None:
     reviewer_id = await add_user(conn, role="admin")
     expense_id = await add(
         conn,
@@ -445,12 +447,10 @@ async def test_valid_expense_defaults_and_exact_money(conn: AsyncConnection) -> 
     )
     row = (
         await conn.execute(
-            select(Expense.status, Expense.total_amount, Expense.covered_amount).where(
-                Expense.id == expense_id
-            )
+            select(Expense.total_amount, Expense.covered_amount).where(Expense.id == expense_id)
         )
     ).one()
-    assert row == ("draft", Decimal("33.35"), Decimal("33.34"))
+    assert row == (Decimal("33.35"), Decimal("33.34"))
 
     confirmed = expense_values(
         await add_participant(conn),
@@ -472,6 +472,7 @@ async def test_one_receipt_can_back_expenses_for_two_participants(
         uploaded_by_id=uploader_id,
         storage_key=f"{first}/2026-05/{uuid.uuid4()}.pdf",
         content_type="application/pdf",
+        ocr_status="pending",
     )
 
     await add(conn, Expense, **expense_values(first, receipt_id=receipt_id))
@@ -524,10 +525,9 @@ async def test_invalid_receipts_are_rejected(
         "participant_id": await add_participant(conn),
         "uploaded_by_id": await add_user(conn),
         "content_type": "image/jpeg",
+        "ocr_status": "pending",
     }
-    receipt_id = await add(conn, Receipt, **values, storage_key="taken")
-    status = await conn.execute(select(Receipt.ocr_status).where(Receipt.id == receipt_id))
-    assert status.scalar_one() == "pending"
+    await add(conn, Receipt, **values, storage_key="taken")
 
     statement = insert(Receipt).values(**{**values, "storage_key": "fresh", **overrides})
     await assert_rejected(conn, statement, constraint)
@@ -601,7 +601,6 @@ async def test_audit_events_are_append_only(conn: AsyncConnection) -> None:
         delete(AuditEvent).where(AuditEvent.id == event_id),
         "audit_events is append-only: DELETE",
     )
-    await assert_rejected(conn, text("TRUNCATE audit_events"), "audit_events is append-only")
 
 
 async def test_audit_event_details_must_be_an_object(conn: AsyncConnection) -> None:

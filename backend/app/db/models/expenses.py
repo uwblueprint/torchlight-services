@@ -4,11 +4,11 @@ from decimal import Decimal
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import CheckConstraint, ForeignKeyConstraint, Index, Numeric
+from sqlalchemy import CheckConstraint, ForeignKey, ForeignKeyConstraint, Index, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.common import UUIDPrimaryKey, created_at, fk, one_of
+from app.db.models.common import UUIDPrimaryKey, created_at, one_of
 
 
 class OcrStatus(StrEnum):
@@ -57,14 +57,13 @@ class Receipt(UUIDPrimaryKey, Base):
             "ocr_confidence IS NULL OR (ocr_confidence >= 0 AND ocr_confidence <= 1)",
             name="ocr_confidence_range",
         ),
-        Index("ix_receipts_participant_id", "participant_id"),
     )
 
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
-    uploaded_by_id: Mapped[uuid.UUID] = mapped_column(fk("users.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
+    uploaded_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     storage_key: Mapped[str] = mapped_column(unique=True)
     content_type: Mapped[str]
-    ocr_status: Mapped[str] = mapped_column(server_default=OcrStatus.PENDING.value)
+    ocr_status: Mapped[str]
     ocr_confidence: Mapped[Decimal | None] = mapped_column(Numeric(5, 4))
     ocr_extracted_data: Mapped[dict[str, Any] | None]
     created_at: Mapped[datetime] = created_at()
@@ -117,22 +116,20 @@ class Expense(UUIDPrimaryKey, Base):
         ForeignKeyConstraint(
             ["subcategory_id", "category_id"],
             ["funding_subcategories.id", "funding_subcategories.category_id"],
-            ondelete="RESTRICT",
         ),
         Index("ix_expenses_balance", "participant_id", "fiscal_year", "category_id", "status"),
         Index("ix_expenses_review_queue", "review_status", "created_at"),
-        Index("ix_expenses_receipt_id", "receipt_id"),
     )
 
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
     # Derived server-side from start_date, never accepted from a client.
     fiscal_year: Mapped[int]
-    receipt_id: Mapped[uuid.UUID | None] = mapped_column(fk("receipts.id"))
+    receipt_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("receipts.id"))
     # Nullable so an unclassified expense can exist before review (DB-01 open decision 2).
-    category_id: Mapped[uuid.UUID | None] = mapped_column(fk("funding_categories.id"))
+    category_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("funding_categories.id"))
     subcategory_id: Mapped[uuid.UUID | None]
     other_category_desc: Mapped[str | None]
-    submitted_by_id: Mapped[uuid.UUID | None] = mapped_column(fk("users.id"))
+    submitted_by_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     source_kind: Mapped[str]
     vendor_name: Mapped[str | None]
     receipt_number: Mapped[str | None]
@@ -142,9 +139,9 @@ class Expense(UUIDPrimaryKey, Base):
     total_amount: Mapped[Decimal]
     covered_amount: Mapped[Decimal]
     out_of_pocket_amount: Mapped[Decimal]
-    status: Mapped[str] = mapped_column(server_default=ExpenseStatus.DRAFT.value)
+    status: Mapped[str]
     review_status: Mapped[str]
-    reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(fk("users.id"))
+    reviewed_by_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     reviewed_at: Mapped[datetime | None]
     review_note: Mapped[str | None]
     family_informed_note: Mapped[str | None]

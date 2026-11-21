@@ -2,11 +2,11 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, Index, Numeric
+from sqlalchemy import CheckConstraint, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.common import UUIDPrimaryKey, created_at, fk, updated_at
+from app.db.models.common import UUIDPrimaryKey, created_at, updated_at
 
 
 class ShiftLog(UUIDPrimaryKey, Base):
@@ -29,12 +29,10 @@ class ShiftLog(UUIDPrimaryKey, Base):
         CheckConstraint(
             "shift_start IS NOT NULL OR mileage_km IS NOT NULL", name="has_shift_or_mileage"
         ),
-        Index("ix_shift_logs_participant_id_service_date", "participant_id", "service_date"),
-        Index("ix_shift_logs_worker_id_service_date", "worker_id", "service_date"),
     )
 
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
-    worker_id: Mapped[uuid.UUID] = mapped_column(fk("users.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
+    worker_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     service_date: Mapped[date]
     shift_start: Mapped[datetime | None]
     shift_end: Mapped[datetime | None]
@@ -49,12 +47,8 @@ class ActivityPlan(UUIDPrimaryKey, Base):
     """A dated plan header for a participant's activity. No line items or cost estimates."""
 
     __tablename__ = "activity_plans"
-    __table_args__ = (
-        Index("ix_activity_plans_participant_id_fiscal_year", "participant_id", "fiscal_year"),
-    )
-
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
-    created_by_user_id: Mapped[uuid.UUID] = mapped_column(fk("users.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     fiscal_year: Mapped[int]
     title: Mapped[str]
     planned_for: Mapped[date]

@@ -1,8 +1,8 @@
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import Date, DateTime, MetaData, Numeric, Text
+from sqlalchemy import DateTime, MetaData, Numeric, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
 
@@ -22,7 +22,6 @@ class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
     type_annotation_map = {
         str: Text,
-        date: Date,
         datetime: DateTime(timezone=True),
         # Money by default; percentages, confidences, and distances override the precision.
         Decimal: Numeric(12, 2),

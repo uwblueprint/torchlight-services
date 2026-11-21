@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint, ForeignKey, func, text
+from sqlalchemy import CheckConstraint, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -19,11 +19,6 @@ def created_at() -> Mapped[datetime]:
 def updated_at() -> Mapped[datetime]:
     # onupdate only fires for ORM/Core updates; raw SQL must set updated_at itself.
     return mapped_column(server_default=func.now(), onupdate=func.now())
-
-
-def fk(target: str, *, ondelete: str = "RESTRICT") -> ForeignKey:
-    # RESTRICT by default: financial and audit rows must never disappear through a cascade.
-    return ForeignKey(target, ondelete=ondelete)
 
 
 def one_of(column: str, values: type[StrEnum]) -> CheckConstraint:

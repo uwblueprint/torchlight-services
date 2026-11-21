@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint, Index, text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.common import UUIDPrimaryKey, created_at, fk, one_of, updated_at
+from app.db.models.common import UUIDPrimaryKey, created_at, one_of, updated_at
 
 
 class UserRole(StrEnum):
@@ -45,7 +45,7 @@ class User(UUIDPrimaryKey, Base):
     display_name: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
     role: Mapped[str]
-    status: Mapped[str] = mapped_column(server_default=UserStatus.INVITED.value)
+    status: Mapped[str]
     deactivated_at: Mapped[datetime | None]
     created_at: Mapped[datetime] = created_at()
     updated_at: Mapped[datetime] = updated_at()
@@ -79,10 +79,9 @@ class ParticipantAssignment(UUIDPrimaryKey, Base):
             unique=True,
             postgresql_where=text("ended_at IS NULL"),
         ),
-        Index("ix_participant_assignments_participant_id", "participant_id"),
     )
 
-    participant_id: Mapped[uuid.UUID] = mapped_column(fk("participants.id"))
-    worker_id: Mapped[uuid.UUID] = mapped_column(fk("users.id"))
+    participant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("participants.id"))
+    worker_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     assigned_at: Mapped[datetime] = created_at()
     ended_at: Mapped[datetime | None]

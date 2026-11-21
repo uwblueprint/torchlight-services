@@ -5,11 +5,10 @@ Revises:
 Create Date: 2026-11-21 11:50:10.986406
 
 The catalog is a snapshot transcribed from the Ministry Passport form (P1PictureInstructions.pdf,
-via frontend/src/lib/passport-categories.ts); confirm names against the source before relying on
-them. No caps are seeded: default_annual_cap stays NULL until
-Torchlight confirms the amounts. No participant, budget, expense, or receipt data is seeded.
-Codes follow the transcription's numbering, with "Other" as p1-13 (database-schema-proposal.md);
-confirm them against the PDF too, because a code can never be reused once data references it.
+via frontend/src/lib/passport-categories.ts). Codes follow the transcription's numbering, with
+"Other" as p1-13. Confirm names and codes against the PDF: a code can never be reused once data
+references it. No caps are seeded (default_annual_cap stays NULL until Torchlight confirms the
+amounts), and no participant, budget, expense, or receipt data.
 """
 
 from collections.abc import Sequence
@@ -114,10 +113,6 @@ def make_audit_events_append_only() -> None:
         "CREATE TRIGGER audit_events_no_update_delete BEFORE UPDATE OR DELETE ON audit_events "
         "FOR EACH ROW EXECUTE FUNCTION audit_events_reject_change()"
     )
-    op.execute(
-        "CREATE TRIGGER audit_events_no_truncate BEFORE TRUNCATE ON audit_events "
-        "FOR EACH STATEMENT EXECUTE FUNCTION audit_events_reject_change()"
-    )
 
 
 def upgrade() -> None:
@@ -156,7 +151,7 @@ def upgrade() -> None:
         sa.Column("display_name", sa.Text(), nullable=False),
         sa.Column("email", sa.Text(), nullable=False),
         sa.Column("role", sa.Text(), nullable=False),
-        sa.Column("status", sa.Text(), server_default="invited", nullable=False),
+        sa.Column("status", sa.Text(), nullable=False),
         sa.Column("deactivated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "created_at",
@@ -208,24 +203,12 @@ def upgrade() -> None:
         ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(
-            ["created_by_user_id"],
-            ["users.id"],
-            name=op.f("fk_activity_plans_created_by_user_id"),
-            ondelete="RESTRICT",
+            ["created_by_user_id"], ["users.id"], name=op.f("fk_activity_plans_created_by_user_id")
         ),
         sa.ForeignKeyConstraint(
-            ["participant_id"],
-            ["participants.id"],
-            name=op.f("fk_activity_plans_participant_id"),
-            ondelete="RESTRICT",
+            ["participant_id"], ["participants.id"], name=op.f("fk_activity_plans_participant_id")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_activity_plans")),
-    )
-    op.create_index(
-        "ix_activity_plans_participant_id_fiscal_year",
-        "activity_plans",
-        ["participant_id", "fiscal_year"],
-        unique=False,
     )
     op.create_table(
         "audit_events",
@@ -252,10 +235,7 @@ def upgrade() -> None:
             name=op.f("ck_audit_events_safe_details_is_object"),
         ),
         sa.ForeignKeyConstraint(
-            ["actor_user_id"],
-            ["users.id"],
-            name=op.f("fk_audit_events_actor_user_id"),
-            ondelete="RESTRICT",
+            ["actor_user_id"], ["users.id"], name=op.f("fk_audit_events_actor_user_id")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_audit_events")),
     )
@@ -278,7 +258,6 @@ def upgrade() -> None:
             ["category_id"],
             ["funding_categories.id"],
             name=op.f("fk_funding_subcategories_category_id"),
-            ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_funding_subcategories")),
         sa.UniqueConstraint(
@@ -308,21 +287,11 @@ def upgrade() -> None:
             ["participant_id"],
             ["participants.id"],
             name=op.f("fk_participant_assignments_participant_id"),
-            ondelete="RESTRICT",
         ),
         sa.ForeignKeyConstraint(
-            ["worker_id"],
-            ["users.id"],
-            name=op.f("fk_participant_assignments_worker_id"),
-            ondelete="RESTRICT",
+            ["worker_id"], ["users.id"], name=op.f("fk_participant_assignments_worker_id")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_participant_assignments")),
-    )
-    op.create_index(
-        "ix_participant_assignments_participant_id",
-        "participant_assignments",
-        ["participant_id"],
-        unique=False,
     )
     op.create_index(
         "uq_participant_assignments_open_worker_participant",
@@ -356,7 +325,6 @@ def upgrade() -> None:
             ["participant_id"],
             ["participants.id"],
             name=op.f("fk_participant_budgets_participant_id"),
-            ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_participant_budgets")),
         sa.UniqueConstraint(
@@ -372,7 +340,7 @@ def upgrade() -> None:
         sa.Column("uploaded_by_id", sa.Uuid(), nullable=False),
         sa.Column("storage_key", sa.Text(), nullable=False),
         sa.Column("content_type", sa.Text(), nullable=False),
-        sa.Column("ocr_status", sa.Text(), server_default="pending", nullable=False),
+        sa.Column("ocr_status", sa.Text(), nullable=False),
         sa.Column("ocr_confidence", sa.Numeric(precision=5, scale=4), nullable=True),
         sa.Column("ocr_extracted_data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column(
@@ -390,21 +358,14 @@ def upgrade() -> None:
             name=op.f("ck_receipts_ocr_confidence_range"),
         ),
         sa.ForeignKeyConstraint(
-            ["participant_id"],
-            ["participants.id"],
-            name=op.f("fk_receipts_participant_id"),
-            ondelete="RESTRICT",
+            ["participant_id"], ["participants.id"], name=op.f("fk_receipts_participant_id")
         ),
         sa.ForeignKeyConstraint(
-            ["uploaded_by_id"],
-            ["users.id"],
-            name=op.f("fk_receipts_uploaded_by_id"),
-            ondelete="RESTRICT",
+            ["uploaded_by_id"], ["users.id"], name=op.f("fk_receipts_uploaded_by_id")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_receipts")),
         sa.UniqueConstraint("storage_key", name=op.f("uq_receipts_storage_key")),
     )
-    op.create_index("ix_receipts_participant_id", "receipts", ["participant_id"], unique=False)
     op.create_table(
         "shift_logs",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
@@ -439,27 +400,10 @@ def upgrade() -> None:
             name=op.f("ck_shift_logs_has_shift_or_mileage"),
         ),
         sa.ForeignKeyConstraint(
-            ["participant_id"],
-            ["participants.id"],
-            name=op.f("fk_shift_logs_participant_id"),
-            ondelete="RESTRICT",
+            ["participant_id"], ["participants.id"], name=op.f("fk_shift_logs_participant_id")
         ),
-        sa.ForeignKeyConstraint(
-            ["worker_id"], ["users.id"], name=op.f("fk_shift_logs_worker_id"), ondelete="RESTRICT"
-        ),
+        sa.ForeignKeyConstraint(["worker_id"], ["users.id"], name=op.f("fk_shift_logs_worker_id")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_shift_logs")),
-    )
-    op.create_index(
-        "ix_shift_logs_participant_id_service_date",
-        "shift_logs",
-        ["participant_id", "service_date"],
-        unique=False,
-    )
-    op.create_index(
-        "ix_shift_logs_worker_id_service_date",
-        "shift_logs",
-        ["worker_id", "service_date"],
-        unique=False,
     )
     op.create_table(
         "category_allocations",
@@ -480,13 +424,11 @@ def upgrade() -> None:
             ["category_id"],
             ["funding_categories.id"],
             name=op.f("fk_category_allocations_category_id"),
-            ondelete="RESTRICT",
         ),
         sa.ForeignKeyConstraint(
             ["participant_budget_id"],
             ["participant_budgets.id"],
             name=op.f("fk_category_allocations_participant_budget_id"),
-            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_category_allocations")),
         sa.UniqueConstraint(
@@ -514,7 +456,7 @@ def upgrade() -> None:
         sa.Column("total_amount", sa.Numeric(precision=12, scale=2), nullable=False),
         sa.Column("covered_amount", sa.Numeric(precision=12, scale=2), nullable=False),
         sa.Column("out_of_pocket_amount", sa.Numeric(precision=12, scale=2), nullable=False),
-        sa.Column("status", sa.Text(), server_default="draft", nullable=False),
+        sa.Column("status", sa.Text(), nullable=False),
         sa.Column("review_status", sa.Text(), nullable=False),
         sa.Column("reviewed_by_id", sa.Uuid(), nullable=True),
         sa.Column("reviewed_at", sa.DateTime(timezone=True), nullable=True),
@@ -541,12 +483,12 @@ def upgrade() -> None:
             name=op.f("ck_expenses_source_kind_allowed"),
         ),
         sa.CheckConstraint(
-            "status <> 'confirmed' OR total_amount > 0",
-            name=op.f("ck_expenses_confirmed_amount_positive"),
-        ),
-        sa.CheckConstraint(
             "status <> 'confirmed' OR category_id IS NOT NULL",
             name=op.f("ck_expenses_confirmed_has_category"),
+        ),
+        sa.CheckConstraint(
+            "status <> 'confirmed' OR total_amount > 0",
+            name=op.f("ck_expenses_confirmed_amount_positive"),
         ),
         sa.CheckConstraint(
             "status IN ('draft', 'awaiting_worker_confirmation', 'confirmed', 'rejected', "
@@ -578,40 +520,24 @@ def upgrade() -> None:
             name=op.f("ck_expenses_amounts_nonnegative"),
         ),
         sa.ForeignKeyConstraint(
-            ["category_id"],
-            ["funding_categories.id"],
-            name=op.f("fk_expenses_category_id"),
-            ondelete="RESTRICT",
+            ["category_id"], ["funding_categories.id"], name=op.f("fk_expenses_category_id")
         ),
         sa.ForeignKeyConstraint(
-            ["participant_id"],
-            ["participants.id"],
-            name=op.f("fk_expenses_participant_id"),
-            ondelete="RESTRICT",
+            ["participant_id"], ["participants.id"], name=op.f("fk_expenses_participant_id")
         ),
         sa.ForeignKeyConstraint(
-            ["receipt_id"],
-            ["receipts.id"],
-            name=op.f("fk_expenses_receipt_id"),
-            ondelete="RESTRICT",
+            ["receipt_id"], ["receipts.id"], name=op.f("fk_expenses_receipt_id")
         ),
         sa.ForeignKeyConstraint(
-            ["reviewed_by_id"],
-            ["users.id"],
-            name=op.f("fk_expenses_reviewed_by_id"),
-            ondelete="RESTRICT",
+            ["reviewed_by_id"], ["users.id"], name=op.f("fk_expenses_reviewed_by_id")
         ),
         sa.ForeignKeyConstraint(
             ["subcategory_id", "category_id"],
             ["funding_subcategories.id", "funding_subcategories.category_id"],
             name=op.f("fk_expenses_subcategory_id_category_id"),
-            ondelete="RESTRICT",
         ),
         sa.ForeignKeyConstraint(
-            ["submitted_by_id"],
-            ["users.id"],
-            name=op.f("fk_expenses_submitted_by_id"),
-            ondelete="RESTRICT",
+            ["submitted_by_id"], ["users.id"], name=op.f("fk_expenses_submitted_by_id")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_expenses")),
     )
@@ -621,7 +547,6 @@ def upgrade() -> None:
         ["participant_id", "fiscal_year", "category_id", "status"],
         unique=False,
     )
-    op.create_index("ix_expenses_receipt_id", "expenses", ["receipt_id"], unique=False)
     op.create_index(
         "ix_expenses_review_queue", "expenses", ["review_status", "created_at"], unique=False
     )
@@ -631,14 +556,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index("ix_expenses_review_queue", table_name="expenses")
-    op.drop_index("ix_expenses_receipt_id", table_name="expenses")
     op.drop_index("ix_expenses_balance", table_name="expenses")
     op.drop_table("expenses")
     op.drop_table("category_allocations")
-    op.drop_index("ix_shift_logs_worker_id_service_date", table_name="shift_logs")
-    op.drop_index("ix_shift_logs_participant_id_service_date", table_name="shift_logs")
     op.drop_table("shift_logs")
-    op.drop_index("ix_receipts_participant_id", table_name="receipts")
     op.drop_table("receipts")
     op.drop_table("participant_budgets")
     op.drop_index(
@@ -646,14 +567,12 @@ def downgrade() -> None:
         table_name="participant_assignments",
         postgresql_where=sa.text("ended_at IS NULL"),
     )
-    op.drop_index("ix_participant_assignments_participant_id", table_name="participant_assignments")
     op.drop_table("participant_assignments")
     op.drop_table("funding_subcategories")
     op.drop_index("ix_audit_events_entity", table_name="audit_events")
     op.drop_index("ix_audit_events_actor", table_name="audit_events")
-    op.drop_table("audit_events")  # also drops its triggers
+    op.drop_table("audit_events")  # also drops its trigger
     op.execute("DROP FUNCTION audit_events_reject_change()")
-    op.drop_index("ix_activity_plans_participant_id_fiscal_year", table_name="activity_plans")
     op.drop_table("activity_plans")
     op.drop_table("users")
     op.drop_table("participants")
