@@ -55,7 +55,7 @@ function rowSuccess(message: string): RowActionState {
 }
 
 function sessionFormError(): InviteFormState {
-  return formError("Your admin session has expired. Sign in again before inviting staff.");
+  return formError("Your admin session has expired. Sign in again before inviting team members.");
 }
 
 function sessionRowError(): RowActionState {
@@ -101,17 +101,19 @@ function inviteFailure(error: unknown): InviteFormState {
   return formError("The invitation could not be sent. Check the API connection and try again.");
 }
 
-function rowFailure(error: unknown, action: "resend" | "training"): RowActionState {
+function rowFailure(error: unknown, action: "resend" | "training", userId: string): RowActionState {
   if (error instanceof ApiError) {
     if (error.status === 409) {
-      revalidatePath("/onboarding");
+      revalidatePath("/admin/team");
+      revalidatePath(`/admin/team/${userId}`);
       return rowError(action === "resend"
-        ? "This account is no longer awaiting an invitation. The list has been refreshed."
-        : "Training is already recorded for this account. The list has been refreshed.");
+        ? "This account is no longer awaiting an invitation. The team directory has been refreshed."
+        : "Training is already recorded for this account. The team directory has been refreshed.");
     }
     if (error.status === 404) {
-      revalidatePath("/onboarding");
-      return rowError("That account no longer exists. The list has been refreshed.");
+      revalidatePath("/admin/team");
+      revalidatePath(`/admin/team/${userId}`);
+      return rowError("That account no longer exists. The team directory has been refreshed.");
     }
     if (error.status === 401 || error.status === 403) {
       return rowError("Your account is not allowed to change this record.");
@@ -149,9 +151,9 @@ export async function inviteWorkerAction(
   }
 
   if (!displayName) {
-    fieldErrors.display_name = "Enter the worker's display name.";
+    fieldErrors.display_name = "Enter the team member's full name.";
   } else if (displayName.length > MAX_DISPLAY_NAME) {
-    fieldErrors.display_name = `Keep the display name to ${MAX_DISPLAY_NAME} characters or fewer.`;
+    fieldErrors.display_name = `Keep the full name to ${MAX_DISPLAY_NAME} characters or fewer.`;
   }
 
   if (!role) fieldErrors.role = "Choose a role.";
@@ -185,7 +187,7 @@ export async function inviteWorkerAction(
   const input: InviteWorkerInput = { email, display_name: displayName, role };
   try {
     const created = await inviteWorker(input);
-    revalidatePath("/onboarding");
+    revalidatePath("/admin/team");
     return {
       status: "success",
       message: `Invitation sent to ${created.email}. The account is listed as invited until AUTH-01 confirms acceptance.`,
@@ -208,10 +210,11 @@ export async function resendInviteAction(
 
   try {
     const updated = await resendInvite(userId);
-    revalidatePath("/onboarding");
+    revalidatePath("/admin/team");
+    revalidatePath(`/admin/team/${userId}`);
     return rowSuccess(`Invitation resent to ${updated.email}.`);
   } catch (error) {
-    return rowFailure(error, "resend");
+    return rowFailure(error, "resend", userId);
   }
 }
 
@@ -227,9 +230,10 @@ export async function recordTrainingAction(
 
   try {
     const updated = await recordTrainingAcknowledgement(userId);
-    revalidatePath("/onboarding");
+    revalidatePath("/admin/team");
+    revalidatePath(`/admin/team/${userId}`);
     return rowSuccess(`Training acknowledgment recorded for ${updated.display_name}. The audit event includes the actor and timestamp.`);
   } catch (error) {
-    return rowFailure(error, "training");
+    return rowFailure(error, "training", userId);
   }
 }

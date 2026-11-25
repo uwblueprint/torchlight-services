@@ -150,7 +150,7 @@ type FixtureState = {
   auditEvents: FixtureAuditEvent[];
 };
 
-const FIXTURE_STATE_VERSION = 1;
+const FIXTURE_STATE_VERSION = 2;
 const globalForFixtures = globalThis as typeof globalThis & {
   __torchlightFixtureState?: { version: number; state: FixtureState };
 };
@@ -224,6 +224,32 @@ function createFixtureState(): FixtureState {
         recorded_by_name: DEMO_ADMIN.display_name,
         audit_event_id: "00000000-0000-4000-8000-0000000000f3",
       },
+    },
+    {
+      id: "00000000-0000-4000-8000-000000000106",
+      display_name: "Dana Example",
+      email: "dana@torchlight.example",
+      role: "admin",
+      status: "active",
+      invited_at: "2026-09-10T15:10:00Z",
+      open_assignment_count: 0,
+      training_acknowledgement: {
+        acknowledged_at: "2026-10-03T16:20:00Z",
+        material: TRAINING_MATERIAL,
+        acknowledged_by_name: "Dana Example",
+        recorded_by_name: DEMO_ADMIN.display_name,
+        audit_event_id: "00000000-0000-4000-8000-0000000000f4",
+      },
+    },
+    {
+      id: "00000000-0000-4000-8000-000000000107",
+      display_name: "Priya Admin",
+      email: "priya.admin@torchlight.example",
+      role: "admin",
+      status: "active",
+      invited_at: "2026-10-01T17:45:00Z",
+      open_assignment_count: 0,
+      training_acknowledgement: null,
     },
   ];
 

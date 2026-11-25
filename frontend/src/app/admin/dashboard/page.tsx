@@ -81,7 +81,7 @@ export default function AdminDashboard() {
       <div className="admin-dash-actions">
         <span className="admin-dash-preview"><i aria-hidden="true" />Preview data</span>
         <Link className="admin-dash-secondary" href="/admin/participants">Participants</Link>
-        <Link className="admin-dash-primary" href="/onboarding">Invite worker</Link>
+        <Link className="admin-dash-primary" href="/admin/team">Add team member</Link>
       </div>
     </header>
 

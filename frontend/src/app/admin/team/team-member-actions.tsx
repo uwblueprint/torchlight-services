@@ -1,17 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import type { OnboardingUser } from "@/lib/api/types";
 import { initialRowActionState } from "./form-state";
 import { recordTrainingAction, resendInviteAction } from "./actions";
 
-type WorkerRowActionsProps = {
+type TeamMemberActionsProps = {
   user: OnboardingUser;
   resendAvailable: boolean;
 };
 
-export function WorkerRowActions({ user, resendAvailable }: WorkerRowActionsProps) {
+export function TeamMemberActions({ user, resendAvailable }: TeamMemberActionsProps) {
   const [resendState, resendAction, resendPending] = useActionState(resendInviteAction, initialRowActionState);
   const [trainingState, trainingAction, trainingPending] = useActionState(recordTrainingAction, initialRowActionState);
 
@@ -19,30 +18,32 @@ export function WorkerRowActions({ user, resendAvailable }: WorkerRowActionsProp
   const canRecordTraining = user.status === "active" && !user.training_acknowledgement;
   const hasMessage = resendState.status !== "idle" || trainingState.status !== "idle";
 
+  if (!canResend && !canRecordTraining && !hasMessage) {
+    return <p className="team-action-empty">No onboarding actions are waiting for this account.</p>;
+  }
+
   return (
-    <div className="onboarding-row-actions">
+    <div className="team-member-actions">
       {canResend && (
-        <form action={resendAction} className="onboarding-inline-form">
+        <form action={resendAction}>
           <input type="hidden" name="user_id" value={user.id} />
-          <button type="submit" className="onboarding-secondary-button" disabled={resendPending}>
+          <button className="team-action-button" disabled={resendPending} type="submit">
             {resendPending ? "Resending…" : "Resend invite"}
           </button>
         </form>
       )}
 
       {canRecordTraining && (
-        <form action={trainingAction} className="onboarding-inline-form">
+        <form action={trainingAction}>
           <input type="hidden" name="user_id" value={user.id} />
-          <button type="submit" className="onboarding-secondary-button" disabled={trainingPending}>
-            {trainingPending ? "Recording…" : "Record training ack"}
+          <button className="team-action-button" disabled={trainingPending} type="submit">
+            {trainingPending ? "Recording…" : "Record training acknowledgment"}
           </button>
         </form>
       )}
 
-      <Link className="onboarding-row-link" href="/admin/participants">Assign participants</Link>
-
       {hasMessage && (
-        <div className="onboarding-row-message" aria-live="polite">
+        <div aria-live="polite" className="team-action-message">
           {resendState.status !== "idle" && (
             <p className={resendState.status === "error" ? "is-error" : "is-success"} role={resendState.status === "error" ? "alert" : "status"}>
               {resendState.message}
