@@ -14,7 +14,6 @@ type AttentionTone = "danger" | "success" | "warning" | "muted";
 type TeamDirectoryProps = {
   users: OnboardingUser[];
   approvedDomains: string[];
-  preview: boolean;
 };
 
 const roleTabs: { role: UserRole; label: string }[] = [
@@ -37,7 +36,7 @@ function lastUpdate(user: OnboardingUser): string {
   return user.training_acknowledgement?.acknowledged_at ?? user.invited_at;
 }
 
-export function TeamDirectory({ users, approvedDomains, preview }: TeamDirectoryProps) {
+export function TeamDirectory({ users, approvedDomains }: TeamDirectoryProps) {
   const [activeRole, setActiveRole] = useState<UserRole>("passport_worker");
   const [query, setQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("alphabetical");
@@ -76,7 +75,6 @@ export function TeamDirectory({ users, approvedDomains, preview }: TeamDirectory
         <p>Invite staff, review account status, and keep onboarding and training on track.</p>
       </div>
       <div className="team-header-actions">
-        {preview && <span className="team-preview"><i aria-hidden="true" />Preview data</span>}
         <button className="team-add-button" onClick={() => setInviteOpen(true)} type="button">
           <PlusIcon />
           Add team member

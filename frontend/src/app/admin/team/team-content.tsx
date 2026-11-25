@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getOnboardingOverview, mocksEnabled } from "@/lib/api/client";
+import { getOnboardingOverview } from "@/lib/api/client";
 import { ApiError, ApiResponseError } from "@/lib/api/errors";
 import type { OnboardingOverview } from "@/lib/api/types";
 import { TeamDirectory } from "./team-directory";
@@ -39,7 +39,6 @@ export async function TeamContent() {
 
   return <TeamDirectory
     approvedDomains={overview.approved_email_domains}
-    preview={mocksEnabled}
     users={overview.users.items}
   />;
 }

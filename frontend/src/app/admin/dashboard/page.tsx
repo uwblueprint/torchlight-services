@@ -53,14 +53,6 @@ const followUpItems = [
   { title: "Confirm agency split", detail: "Jordan Placeholder · A. Admin", when: "This week", tone: "muted", owner: "AA" },
 ];
 
-const developerTasks = [
-  "Load all authorized users and participants; support opening a selected participant profile.",
-  "Build recent activity from auditable events such as receipt uploads, expense updates, and invoice status changes.",
-  "Calculate funding amount, where funding is allocated, and funding spent from approved records.",
-  "Add a follow-up inbox for missing/unclear receipts and client/staff notes.",
-  "Replace these synthetic preview records with API-backed data before release.",
-];
-
 function initials(name: string): string {
   return name
     .trim()
@@ -79,7 +71,6 @@ export default function AdminDashboard() {
         <p className="admin-dash-lede">Here’s what’s happening across your participants and funding today.</p>
       </div>
       <div className="admin-dash-actions">
-        <span className="admin-dash-preview"><i aria-hidden="true" />Preview data</span>
         <Link className="admin-dash-secondary" href="/admin/participants">Participants</Link>
         <Link className="admin-dash-primary" href="/admin/team">Add team member</Link>
       </div>
@@ -182,11 +173,5 @@ export default function AdminDashboard() {
         </table>
       </div>
     </section>
-
-    <p className="admin-dash-footnote">Preview data only · synthetic participants and funding · CAD.</p>
-    <details className="admin-dash-notes">
-      <summary>Implementation notes</summary>
-      <ul>{developerTasks.map((task) => <li key={task}>{task}</li>)}</ul>
-    </details>
   </main>;
 }

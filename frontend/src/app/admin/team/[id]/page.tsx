@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOnboardingOverview, mocksEnabled } from "@/lib/api/client";
+import { getOnboardingOverview } from "@/lib/api/client";
 import { ApiError, ApiResponseError } from "@/lib/api/errors";
 import type { OnboardingOverview, OnboardingUser } from "@/lib/api/types";
 import { requireAdmin } from "@/lib/auth";
@@ -71,10 +71,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/admin/team/
       <div className="team-detail-identity">
         <span className="team-detail-avatar" aria-hidden="true">{userInitials(user.display_name)}</span>
         <div>
-          <div className="team-detail-eyebrow-row">
-            <p className="stub-eyebrow">Team member</p>
-            {mocksEnabled && <span className="team-preview"><i aria-hidden="true" />Preview data</span>}
-          </div>
+          <p className="stub-eyebrow">Team member</p>
           <h1>{user.display_name}</h1>
           <p className="team-detail-email">{user.email}</p>
         </div>
