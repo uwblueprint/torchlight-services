@@ -14,6 +14,9 @@ export default function config(phase: string): NextConfig {
   return {
     cacheComponents: true,
     partialPrefetching: true,
+    experimental: {
+      authInterrupts: true,
+    },
     turbopack: {
       rules: {
         "*.css": {

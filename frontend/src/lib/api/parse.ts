@@ -4,13 +4,19 @@ import {
   expenseSourceKinds,
   expenseStatuses,
   reviewStatuses,
+  userRoles,
+  userStatuses,
   type ApiErrorBody,
   type CategoryBalance,
   type ExpenseRecord,
   type ListResponse,
   type Money,
-  type SignedMoney,
+  type OnboardingOverview,
+  type OnboardingUser,
   type ParticipantSummary,
+  type SignedMoney,
+  type TrainingAcknowledgement,
+  type User,
   type ValidationIssue,
 } from "@/lib/api/types";
 
@@ -115,6 +121,38 @@ const items = <T>(item: Parser<T>): Parser<T[]> => (value, field) => {
 function list<T>(item: Parser<T>): Parser<ListResponse<T>> {
   return object<ListResponse<T>>({ items: items(item), total: count, next_cursor: nullable(string) });
 }
+
+const userShape = {
+  id: string,
+  display_name: string,
+  email: string,
+  role: oneOf(userRoles),
+  status: oneOf(userStatuses),
+} satisfies { [K in keyof User]-?: Parser<User[K]> };
+
+export const user = object<User>(userShape);
+
+const trainingAcknowledgement = object<TrainingAcknowledgement>({
+  acknowledged_at: isoDateTime,
+  material: string,
+  acknowledged_by_name: string,
+  recorded_by_name: string,
+  audit_event_id: string,
+});
+
+export const onboardingUser = object<OnboardingUser>({
+  ...userShape,
+  invited_at: isoDateTime,
+  open_assignment_count: count,
+  training_acknowledgement: nullable(trainingAcknowledgement),
+});
+
+export const onboardingOverview = object<OnboardingOverview>({
+  users: list(onboardingUser),
+  approved_email_domains: items(string),
+  training_material: string,
+  resend_available: boolean,
+});
 
 export const participantSummary = object<ParticipantSummary>({
   id: string,

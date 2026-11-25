@@ -12,8 +12,8 @@ export default function LoginPage() {
       "Do not provide participant/caregiver self-service signup; account creation is for staff/worker roles.",
     ]}
     sections={[
-      { title: "Account access", description: "Sign-in fields are intentionally disabled until authentication is implemented.", kind: "form", fields: [{ label: "Work email", type: "text", placeholder: "name@organization.ca" }, { label: "Password", type: "text", placeholder: "Authentication not connected" }], action: "Sign in", callout: "No credentials are accepted or stored by this prototype." },
-      { title: "Role destinations", kind: "links", links: [{ label: "Worker portal stub", href: "/worker/dashboard" }, { label: "Admin portal stub", href: "/admin/dashboard" }, { label: "Worker onboarding stub", href: "/onboarding" }] },
+      { title: "Account access", description: "Sign-in fields are intentionally disabled until authentication is implemented.", kind: "form", fields: [{ label: "Work email", type: "text", placeholder: "name@organization.ca" }, { label: "Password", type: "text", placeholder: "Authentication not connected" }], action: "Sign in", callout: "No credentials are accepted or stored." },
+      { title: "Role destinations", kind: "links", links: [{ label: "Worker portal stub", href: "/worker/dashboard" }, { label: "Admin portal stub", href: "/admin/dashboard" }, { label: "Team & onboarding", href: "/admin/team" }] },
     ]}
   />;
 }

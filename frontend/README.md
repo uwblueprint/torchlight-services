@@ -1,6 +1,6 @@
 # Torchlight web app
 
-This Next.js app contains navigable worker and admin workflow previews using fabricated sample values only. Pages are not wired to the API yet; the typed client they will use is in `src/lib/api/`. Do not use the app with real participant information.
+This Next.js app contains navigable worker and admin workflow previews using fabricated sample values only. Most pages are not wired to the API yet; team management and worker onboarding run against the dev fixture transport, and the typed client they will use is in `src/lib/api/`. Do not use the app with real participant information.
 
 ## Run
 
@@ -21,6 +21,12 @@ Copy `.env.example` to `.env.local`.
 
 With mocks off, a failed or malformed response throws `ApiError` or `ApiResponseError`; it never falls back to fixtures.
 
+The Team screen uses a temporary AUTH-01/AUDIT-LOG-01-shaped contract for inviting staff, resending an invite, and recording a training acknowledgment. The fixture transport keeps those records in memory, sends no email, and resets when the dev server restarts. With mocks off, the server-side admin guard denies the route until [AUTH-01](../docs/tickets/AUTH-01.md) supplies a session. `/onboarding` redirects to `/admin/team`; member detail lives at `/admin/team/[id]`.
+
+## Brand assets and design tokens
+
+The shared palette is defined in `src/app/globals.css` as `--color-*` tokens and documented in [`docs/design/README.md`](../docs/design/README.md). Brand images live in `public/brand/`; the flame mark is used in the app header and is the source for the multi-size tab icon at `src/app/favicon.ico`. The full wordmark is reserved for larger placements. The color and brand sheets in `docs/design/reference/` are reference material, not served app assets.
+
 ## Checks
 
 ```bash
@@ -37,7 +43,7 @@ Screen tickets, one per route in the current stub set. Shared money, list, state
 
 | Ticket | Screen | Route |
 |---|---|---|
-| FE-02 | Worker onboarding | `/onboarding` |
+| FE-02 | Team directory & worker onboarding | `/admin/team`, `/admin/team/[id]` |
 | FE-03 | Sign-in, session, and role routing | `/login`, `/` |
 | FE-04 | Funding & activity | `/worker/dashboard` |
 | FE-05 | Add an expense | `/worker/submit` |

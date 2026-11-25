@@ -6,7 +6,7 @@ The backend currently contains the FastAPI app, PostgreSQL session setup, a data
 
 1. **INFRA-01 — Local API + PostgreSQL verification**: start the existing Compose services together; verify database connectivity and container reload. Health returns 503 when the database is unavailable; `tests/integration/test_db_connection.py` covers live and unreachable databases.
 2. **DB-01 — Core schema and category catalog**: add reviewed Alembic models/migrations for users, participants, assignments, categories, subcategories, and funding allocations. Model 18 canonical funded Ministry categories; the PDF's 19th numbered choice, “Other types, please specify,” is a separate expense classification with required free text, not a category row. Confirm the transcribed names/codes and map workbook transaction-label variants before seeding; confirm cap rules and funding sources separately. Table list and constraints: [`docs/tickets/DB-01.md`](../docs/tickets/DB-01.md).
-3. **AUTH-01 — Authentication and role/assignment authorization**: enforce worker/admin access server-side before exposing participant or receipt data.
+3. **AUTH-01 — Authentication and role/assignment authorization**: enforce worker/admin access server-side before exposing participant or receipt data. See [the ticket](../docs/tickets/AUTH-01.md).
 4. **BE-01 — Budget calculator**: implement tested `Decimal` calculations; distinguish participant allocation remaining from category cap headroom. Do not embed unconfirmed fees or acknowledgment policies.
 5. **AUDIT-LOG-01 — Audit event persistence**: store actor/action/entity/time for sensitive changes without logging receipt bytes, OCR text, secrets, or unnecessary PII.
 6. **API-01 / API-02 — Participant/funding APIs and expense ledger**: add participant-scoped queries, expense ownership/source, lifecycle, and balance updates.
@@ -35,7 +35,7 @@ Staff training, showcase packaging, and autonomous handoff follow successful rel
 | INFRA-01 | Verify local API + PostgreSQL Compose stack and live DB health | None; local development only |
 | INFRA-02 | PR CI merge gate: live-DB tests, migration checks, Compose build/health smoke test | INFRA-01; repo admin applies branch protection |
 | DB-01 | Approved core schema, migrations, and category catalog | Resolve authoritative category/cap list before seeding |
-| AUTH-01 | Authentication, roles, and assignment-scoped authorization | Schema contract; required before real records |
+| [AUTH-01](../docs/tickets/AUTH-01.md) | Authentication, roles, and assignment-scoped authorization | Schema contract; required before real records |
 | BE-01 | Pure `Decimal` budget split calculator | Can overlap DB-01; approved ledger/cap rules required |
 | AUDIT-LOG-01 | Persist sensitive-action audit events | Schema and actor identity contract |
 | API-01 / API-02 | Participant/funding reads and expense ledger | DB-01, AUTH-01, BE-01, audit rules |
