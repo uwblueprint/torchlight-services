@@ -34,12 +34,6 @@ export function ChevronRightIcon({ className }: IconProps) {
   </svg>;
 }
 
-export function CheckIcon({ className }: IconProps) {
-  return <svg aria-hidden="true" className={className} fill="none" height="14" viewBox="0 0 14 14" width="14">
-    <path d="m3 7.25 2.5 2.5L11 4.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
-  </svg>;
-}
-
 export function UserIcon({ className }: IconProps) {
   return <svg aria-hidden="true" className={className} fill="none" height="16" viewBox="0 0 16 16" width="16">
     <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.4" />

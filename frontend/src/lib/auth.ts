@@ -1,14 +1,7 @@
 import { forbidden } from "next/navigation";
 import { mocksEnabled } from "@/lib/api/client";
 import type { User } from "@/lib/api/types";
-
-const DEMO_ADMIN: User = {
-  id: "00000000-0000-4000-8000-000000000100",
-  display_name: "Demo Admin",
-  email: "admin@torchlight.example",
-  role: "admin",
-  status: "active",
-};
+import { DEMO_ADMIN } from "@/lib/demo-admin";
 
 // AUTH-01 seam: replace this with the server-side Supabase session lookup. Until then,
 // only the fixture-backed development preview has an administrator.

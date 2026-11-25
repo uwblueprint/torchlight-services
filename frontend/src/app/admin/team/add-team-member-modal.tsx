@@ -33,6 +33,11 @@ export function AddTeamMemberModal({ approvedDomains, onClose }: AddTeamMemberMo
   const summaryRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const pendingRef = useRef(pending);
+
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
 
   useEffect(() => {
     const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -41,8 +46,9 @@ export function AddTeamMemberModal({ approvedDomains, onClose }: AddTeamMemberMo
     nameRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
+      // Dismissal is ignored mid-submit so the result message is not lost.
       if (event.key === "Escape") {
-        onClose();
+        if (!pendingRef.current) onClose();
         return;
       }
       if (event.key !== "Tab" || !modalRef.current) return;
@@ -85,7 +91,7 @@ export function AddTeamMemberModal({ approvedDomains, onClose }: AddTeamMemberMo
   const canSubmit = email.trim().length > 0 && displayName.trim().length > 0 && !pending;
 
   function closeFromBackdrop(event: MouseEvent<HTMLDivElement>) {
-    if (event.target === event.currentTarget) onClose();
+    if (event.target === event.currentTarget && !pending) onClose();
   }
 
   const worker = role === "passport_worker";

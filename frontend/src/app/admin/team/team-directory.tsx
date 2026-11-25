@@ -89,7 +89,7 @@ export function TeamDirectory({ users, approvedDomains }: TeamDirectoryProps) {
         {roleTabs.map((tab) => {
           const selected = activeRole === tab.role;
           return <button
-            aria-controls={`team-panel-${tab.role}`}
+            aria-controls={selected ? `team-panel-${tab.role}` : undefined}
             aria-selected={selected}
             className={`team-tab${selected ? " is-active" : ""}`}
             id={`team-tab-${tab.role}`}
@@ -212,8 +212,8 @@ export function TeamDirectory({ users, approvedDomains }: TeamDirectoryProps) {
                 </tbody>
               </table>
             </div>
-            <p className="team-result-count">
-              Showing 1–{rows.length} of {rows.length}
+            <p className="team-result-count" role="status">
+              Showing {rows.length} of {roleCount} {roleCount === 1 ? "person" : "people"}
             </p>
           </>
         )}

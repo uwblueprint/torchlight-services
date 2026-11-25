@@ -1,6 +1,7 @@
 // Fictional data only. Output still goes through parse.ts, so fixtures can't drift.
 import type { ApiTransport } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
+import { DEMO_ADMIN } from "@/lib/demo-admin";
 import type {
   CategoryBalance,
   ExpenseRecord,
@@ -132,7 +133,6 @@ const expenses: ExpenseRecord[] = [
 const TRAINING_MATERIAL = "Privacy, receipts, and expense expectations";
 const APPROVED_EMAIL_DOMAINS = ["torchlight.example"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DEMO_ADMIN = { id: "00000000-0000-4000-8000-000000000100", display_name: "Demo Admin" };
 
 type FixtureAuditEvent = {
   id: string;
