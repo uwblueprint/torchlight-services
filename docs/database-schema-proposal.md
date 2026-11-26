@@ -5,7 +5,7 @@
 > twelve tables; do not read its column lists as current. The section on product and data boundaries
 > still applies.
 
-**Status: implemented as SQLAlchemy models (`backend/app/db/models/`) and one Alembic migration (`backend/alembic/versions/`). No seed rows. Not approved for real participant data.**
+**Status: this 24-table design is not implemented. DB-01's twelve-table cut is, in `backend/app/db/models/` and `backend/alembic/versions/0001_db_01_core_schema.py`. Not approved for real participant data.**
 
 The funding model is deliberately flat. For one participant, one funding year, and one category there is a single ceiling that confirmed spending fills up. There is no plan object, no plan versioning, and no separate funding-pool total.
 
